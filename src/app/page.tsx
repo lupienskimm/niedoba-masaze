@@ -1,69 +1,153 @@
 import Image from "next/image";
+import Link from "next/link";
+import { pricing, services, site } from "@/content/site";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <>
+      <section className="hero">
+        <div className="hero__media">
+          <Image
+            src="/images/slide1-1.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+        </div>
+        <div className="hero__shade" />
+        <div className="marquee" aria-hidden="true">
+          <div className="marquee__track">
+            DRIFT AWAY · MASÁŽE NIEDOBA · POHLAZENÍ TĚLA I DUŠE ·&nbsp;
+            DRIFT AWAY · MASÁŽE NIEDOBA · POHLAZENÍ TĚLA I DUŠE ·&nbsp;
+          </div>
+        </div>
+        <div className="hero__content">
+          <p className="hero__brand reveal">{site.name}</p>
+          <h1 className="hero__title reveal reveal-delay">{site.heroTitle}</h1>
+          <p className="hero__lead reveal reveal-delay-2">{site.heroLead}</p>
+          <div className="hero__actions reveal reveal-delay-2">
+            <Link href="/objednani" className="btn btn--primary">
+              Objednat
+            </Link>
+            <Link href="/sluzby" className="btn btn--ghost" style={{ color: "#fff", borderColor: "#fff" }}>
+              Služby
+            </Link>
+          </div>
+        </div>
+        <svg className="hero-wave" viewBox="0 0 1440 48" preserveAspectRatio="none" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M0,32 C240,48 480,0 720,16 C960,32 1200,48 1440,24 L1440,48 L0,48 Z"
+          />
+        </svg>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="band">
+            <p>
+              <strong>{site.openingHoursShort}</strong>
+            </p>
+            <p className="muted">{site.bookingHint}</p>
+            <Link href="/objednani" className="btn btn--primary">
+              Domluvte si masáž
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--alt">
+        <div className="wrap">
+          <div className="section__head">
+            <p className="section__eyebrow">Služby</p>
+            <h2 className="section__title">Široké spektrum masáží</h2>
+            <p className="section__lead">{site.servicesIntro}</p>
+          </div>
+          <div className="services-grid">
+            {services.map((s) => (
+              <Link key={s.id} href={`/sluzby#${s.id}`} className="service-card">
+                <div className="service-card__img">
+                  <Image src={s.image} alt="" width={480} height={360} />
+                </div>
+                <h3 className="service-card__title">{s.title}</h3>
+                <p className="service-card__text">{s.short}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap split">
+          <div className="split__media">
+            <Image
+              src="/images/omne-home.jpg"
+              alt=""
+              width={720}
+              height={900}
+            />
+          </div>
+          <div>
+            <p className="section__eyebrow">O mně</p>
+            <h2 className="section__title">{site.aboutShort}</h2>
+            <p className="section__lead" style={{ marginBottom: 24 }}>
+              {site.aboutBody[0]}
+            </p>
+            <Link href="/o-mne" className="btn btn--primary">
+              Více o mně
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--alt">
+        <div className="wrap">
+          <div className="section__head">
+            <p className="section__eyebrow">Ceník</p>
+            <h2 className="section__title">Služby a ceník</h2>
+            <p className="section__lead">{site.servicesIntro}</p>
+          </div>
+          <table className="price-table">
+            <tbody>
+              {pricing.map((row) => (
+                <tr key={row.name}>
+                  <td>{row.name}</td>
+                  <td>{row.price}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="muted" style={{ marginTop: 24, maxWidth: "48ch" }}>
+            {site.specialOffer}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <blockquote className="quote">
+            „{site.testimonial.quote}“
+            <cite>– {site.testimonial.author}</cite>
+          </blockquote>
+          <div className="band" style={{ marginTop: 48 }}>
+            <div>
+              <p className="section__eyebrow">Kontakt</p>
+              <p>
+                <strong>{site.address}</strong>
+              </p>
+              <p>
+                <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
+                {" · "}
+                <a href={`mailto:${site.email}`}>{site.email}</a>
+              </p>
+            </div>
+            <Link href="/kontakt" className="btn btn--ghost">
+              Kontakt
+            </Link>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }
