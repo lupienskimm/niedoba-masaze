@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Inter, Libre_Baskerville } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
+import { MobileLayoutProvider } from "@/components/MobileLayoutProvider";
+import { MobileLayoutSwitcher } from "@/components/MobileLayoutSwitcher";
+import { MobileQuickBar } from "@/components/MobileQuickBar";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -50,10 +53,14 @@ export default function RootLayout({
       lang="cs"
       className={`${inter.variable} ${classic.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <body className="min-h-full flex flex-col layout-v1">
+        <MobileLayoutProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <MobileQuickBar />
+          <MobileLayoutSwitcher />
+        </MobileLayoutProvider>
       </body>
     </html>
   );
