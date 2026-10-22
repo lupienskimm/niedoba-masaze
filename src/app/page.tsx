@@ -92,10 +92,58 @@ function BookingCloser() {
   );
 }
 
+function PhotoIntro({
+  title,
+  showHeroCtas = false,
+}: {
+  title: string;
+  showHeroCtas?: boolean;
+}) {
+  return (
+    <section className="v2-hero">
+      <div className="v2-hero__photo">
+        <Image
+          src="/images/omne.jpg"
+          alt="Robert Niedoba"
+          width={220}
+          height={220}
+          priority
+        />
+      </div>
+      <p className="v2-hero__brand">{site.name}</p>
+      <h1 className="v2-hero__title">{title}</h1>
+      <p className="v2-hero__meta">{site.openingHoursShort}</p>
+      <p className="v2-hero__note">{site.openingNote}</p>
+      <div
+        className="v2-hero__actions"
+        {...(showHeroCtas ? { "data-hero-ctas": true } : {})}
+      >
+        <Link href="/objednani" className="btn btn--primary v2-hero__cta">
+          Objednat masáž
+        </Link>
+        <a
+          href={`tel:${site.phoneRaw}`}
+          className="btn btn--ghost v2-hero__cta"
+        >
+          Zavolat {site.phoneDisplay}
+        </a>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
-      {/* V1 — plný marketingový web */}
+      {/* Mobile only — always V2-style */}
+      <div className="home-mobile">
+        <PhotoIntro title={site.aboutShort} showHeroCtas />
+        <QuickPricing />
+        <FeaturedServices />
+        <BookingCloser />
+      </div>
+
+      {/* Desktop V1 — plný web */}
       <div className="home-v1">
         <section className="hero">
           <div className="hero__media">
@@ -233,40 +281,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* V2 — kruhová foto + o mně + cesta k rezervaci */}
-      <div className="home-v2">
-        <section className="v2-hero">
-          <div className="v2-hero__photo">
-            <Image
-              src="/images/omne.jpg"
-              alt="Robert Niedoba"
-              width={220}
-              height={220}
-              priority
-            />
-          </div>
-          <p className="v2-hero__brand">{site.name}</p>
-          <h1 className="v2-hero__title">{site.aboutShort}</h1>
-          <p className="v2-hero__meta">{site.openingHoursShort}</p>
-          <p className="v2-hero__note">{site.openingNote}</p>
-          <div className="v2-hero__actions">
-            <Link href="/objednani" className="btn btn--primary v2-hero__cta">
-              Objednat masáž
-            </Link>
-            <a
-              href={`tel:${site.phoneRaw}`}
-              className="btn btn--ghost v2-hero__cta"
-            >
-              Zavolat {site.phoneDisplay}
-            </a>
-          </div>
-        </section>
-        <QuickPricing />
-        <FeaturedServices />
-        <BookingCloser />
-      </div>
-
-      {/* V3 — slogan „pohlažení těla i duše“ + hero masáž + rychlá rezervace */}
+      {/* Desktop V3 — kombinace V1 hero + V4 foto */}
       <div className="home-v3">
         <section className="hero hero--v3">
           <div className="hero__media">
@@ -298,13 +313,7 @@ export default function HomePage() {
             <p className="hero__hours">{site.openingHoursShort}</p>
           </div>
         </section>
-        <QuickPricing cta="Domluvte si u mě masáž" />
-        <FeaturedServices />
-        <BookingCloser />
-      </div>
 
-      {/* V4 — foto + slogan vedle sebe, pak rezervace */}
-      <div className="home-v4">
         <section className="v4-intro">
           <div className="v4-intro__photo">
             <Image
@@ -312,68 +321,41 @@ export default function HomePage() {
               alt="Robert Niedoba"
               width={360}
               height={360}
-              priority
             />
           </div>
           <div className="v4-intro__copy">
-            <p className="v2-hero__brand">{site.name}</p>
-            <h1 className="v4-intro__title">{site.heroTitle}</h1>
+            <p className="v2-hero__brand">O mně</p>
+            <h2 className="v4-intro__title">{site.aboutShort}</h2>
             <p className="v4-intro__lead">{site.heroLead}</p>
-            <p className="v2-hero__meta">{site.openingHoursShort}</p>
-            <div className="v2-hero__actions v4-intro__actions">
-              <Link href="/objednani" className="btn btn--primary v2-hero__cta">
-                Objednat
-              </Link>
-              <a
-                href={`tel:${site.phoneRaw}`}
-                className="btn btn--ghost v2-hero__cta"
-              >
-                Zavolat
-              </a>
-            </div>
+            <Link href="/o-mne" className="btn btn--primary">
+              Více o mně
+            </Link>
+          </div>
+        </section>
+
+        <QuickPricing cta="Domluvte si u mě masáž" />
+        <FeaturedServices />
+        <BookingCloser />
+      </div>
+
+      {/* Desktop V4 — stejný design jako V3, pořadí jako mobil */}
+      <div className="home-v4">
+        <PhotoIntro title={site.heroTitle} />
+        <section className="v4-atmosphere">
+          <div className="v4-atmosphere__media">
+            <Image
+              src="/images/hero-massage.jpg"
+              alt=""
+              fill
+              sizes="100vw"
+            />
+            <div className="v4-atmosphere__shade" />
+            <p className="v4-atmosphere__text">{site.aboutShort}</p>
           </div>
         </section>
         <QuickPricing />
         <FeaturedServices />
         <BookingCloser />
-      </div>
-
-      {/* V5 — maximálně přímo k rezervaci, slogan uprostřed */}
-      <div className="home-v5">
-        <section className="v5-hero">
-          <p className="v2-hero__brand">{site.name}</p>
-          <h1 className="v5-hero__title">{site.heroTitle}</h1>
-          <p className="v5-hero__line">{site.aboutShort}</p>
-          <Link href="/objednani" className="btn btn--primary v5-hero__cta">
-            Objednat masáž
-          </Link>
-          <a href={`tel:${site.phoneRaw}`} className="v5-hero__phone">
-            {site.phoneDisplay}
-          </a>
-          <p className="v2-hero__note">
-            {site.openingHoursShort} · {site.openingNote}
-          </p>
-        </section>
-        <section className="v2-section v2-section--alt">
-          <div className="v2-section__inner">
-            <div className="v2-prices">
-              {pricing.map((row) => (
-                <div key={row.name} className="v2-price">
-                  <p className="v2-price__name">{row.name}</p>
-                  <p className="v2-price__value">{row.price}</p>
-                </div>
-              ))}
-            </div>
-            <Link href="/objednani" className="btn btn--primary v2-section__cta">
-              Rezervovat termín
-            </Link>
-            <div className="v5-mini-links">
-              <Link href="/sluzby">Služby</Link>
-              <Link href="/o-mne">O mně</Link>
-              <Link href="/kontakt">Kontakt</Link>
-            </div>
-          </div>
-        </section>
       </div>
     </>
   );

@@ -6,6 +6,7 @@ import {
   useMobileLayout,
 } from "@/components/MobileLayoutProvider";
 
+/** Desktop only — mobile always uses the V2-style home */
 export function MobileLayoutSwitcher() {
   const { version, setVersion, ready } = useMobileLayout();
 
@@ -15,7 +16,7 @@ export function MobileLayoutSwitcher() {
     <div
       className="layout-switcher"
       role="group"
-      aria-label="Verze homepage"
+      aria-label="Verze homepage (PC)"
     >
       {LAYOUT_VERSIONS.map((v) => (
         <button
