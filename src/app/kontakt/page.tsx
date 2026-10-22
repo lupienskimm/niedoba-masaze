@@ -24,7 +24,6 @@ export default function ContactPage() {
             </div>
             <div className="contact-stack">
               <p className="section__eyebrow">Kontakt</p>
-              <p>{site.businessNote}</p>
               <p>
                 <strong>Provozovna:</strong> {site.address}
               </p>
