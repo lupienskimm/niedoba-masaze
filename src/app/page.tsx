@@ -2,20 +2,100 @@ import Image from "next/image";
 import Link from "next/link";
 import { pricing, services, site } from "@/content/site";
 
-const v2ServiceIds = [
+const featuredIds = [
   "hloubkova",
   "relaxace",
   "akupresura",
   "masaz-nohou",
 ] as const;
 
-export default function HomePage() {
-  const v2Services = services.filter((s) =>
-    (v2ServiceIds as readonly string[]).includes(s.id),
+function FeaturedServices() {
+  const list = services.filter((s) =>
+    (featuredIds as readonly string[]).includes(s.id),
   );
+  return (
+    <section className="v2-section v2-section--alt">
+      <div className="v2-section__inner">
+        <h2 className="v2-section__title">Nejčastější služby</h2>
+        <p className="v2-section__lead">{site.servicesIntro}</p>
+        <div className="v2-services">
+          {list.map((s) => (
+            <Link key={s.id} href={`/sluzby#${s.id}`} className="v2-service">
+              <span className="v2-service__img">
+                <Image src={s.image} alt="" width={120} height={90} />
+              </span>
+              <span className="v2-service__body">
+                <span className="v2-service__title">{s.title}</span>
+                <span className="v2-service__text">{s.short}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+        <Link href="/sluzby" className="v2-text-link">
+          Všechny služby →
+        </Link>
+      </div>
+    </section>
+  );
+}
 
+function QuickPricing({ cta = "Rezervovat termín" }: { cta?: string }) {
+  return (
+    <section className="v2-section">
+      <div className="v2-section__inner">
+        <h2 className="v2-section__title">Rychlý ceník</h2>
+        <div className="v2-prices">
+          {pricing.map((row) => (
+            <div key={row.name} className="v2-price">
+              <p className="v2-price__name">{row.name}</p>
+              <p className="v2-price__value">{row.price}</p>
+            </div>
+          ))}
+        </div>
+        <p className="v2-section__note">{site.specialOffer}</p>
+        <Link href="/objednani" className="btn btn--primary v2-section__cta">
+          {cta}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function BookingCloser() {
+  return (
+    <section className="v2-section">
+      <div className="v2-section__inner v2-section__inner--narrow">
+        <blockquote className="v2-quote">
+          „{site.testimonial.quote}“
+          <cite>– {site.testimonial.author}</cite>
+        </blockquote>
+        <div className="v2-contact">
+          <p>
+            <strong>{site.address}</strong>
+          </p>
+          <p>
+            <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
+            {" · "}
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+          </p>
+          <div className="v2-contact__actions">
+            <Link href="/objednani" className="btn btn--primary">
+              Objednat
+            </Link>
+            <Link href="/kontakt" className="btn btn--ghost">
+              Mapa a kontakt
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function HomePage() {
   return (
     <>
+      {/* V1 — plný marketingový web */}
       <div className="home-v1">
         <section className="hero">
           <div className="hero__media">
@@ -153,6 +233,7 @@ export default function HomePage() {
         </section>
       </div>
 
+      {/* V2 — kruhová foto + o mně + cesta k rezervaci */}
       <div className="home-v2">
         <section className="v2-hero">
           <div className="v2-hero__photo">
@@ -168,7 +249,6 @@ export default function HomePage() {
           <h1 className="v2-hero__title">{site.aboutShort}</h1>
           <p className="v2-hero__meta">{site.openingHoursShort}</p>
           <p className="v2-hero__note">{site.openingNote}</p>
-
           <div className="v2-hero__actions">
             <Link href="/objednani" className="btn btn--primary v2-hero__cta">
               Objednat masáž
@@ -181,10 +261,101 @@ export default function HomePage() {
             </a>
           </div>
         </section>
+        <QuickPricing />
+        <FeaturedServices />
+        <BookingCloser />
+      </div>
 
-        <section className="v2-section">
+      {/* V3 — slogan „pohlažení těla i duše“ + hero masáž + rychlá rezervace */}
+      <div className="home-v3">
+        <section className="hero hero--v3">
+          <div className="hero__media">
+            <Image
+              src="/images/hero-massage.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+            />
+          </div>
+          <div className="hero__shade" />
+          <div className="hero__content hero__content--center">
+            <p className="hero__brand">{site.name}</p>
+            <h1 className="hero__title hero__title--xl">{site.heroTitle}</h1>
+            <p className="hero__lead">{site.aboutShort}</p>
+            <div className="hero__actions">
+              <Link href="/objednani" className="btn btn--primary">
+                Objednat masáž
+              </Link>
+              <a
+                href={`tel:${site.phoneRaw}`}
+                className="btn btn--ghost"
+                style={{ color: "#fff", borderColor: "rgba(255,255,255,0.55)" }}
+              >
+                Zavolat
+              </a>
+            </div>
+            <p className="hero__hours">{site.openingHoursShort}</p>
+          </div>
+        </section>
+        <QuickPricing cta="Domluvte si u mě masáž" />
+        <FeaturedServices />
+        <BookingCloser />
+      </div>
+
+      {/* V4 — foto + slogan vedle sebe, pak rezervace */}
+      <div className="home-v4">
+        <section className="v4-intro">
+          <div className="v4-intro__photo">
+            <Image
+              src="/images/omne.jpg"
+              alt="Robert Niedoba"
+              width={360}
+              height={360}
+              priority
+            />
+          </div>
+          <div className="v4-intro__copy">
+            <p className="v2-hero__brand">{site.name}</p>
+            <h1 className="v4-intro__title">{site.heroTitle}</h1>
+            <p className="v4-intro__lead">{site.heroLead}</p>
+            <p className="v2-hero__meta">{site.openingHoursShort}</p>
+            <div className="v2-hero__actions v4-intro__actions">
+              <Link href="/objednani" className="btn btn--primary v2-hero__cta">
+                Objednat
+              </Link>
+              <a
+                href={`tel:${site.phoneRaw}`}
+                className="btn btn--ghost v2-hero__cta"
+              >
+                Zavolat
+              </a>
+            </div>
+          </div>
+        </section>
+        <QuickPricing />
+        <FeaturedServices />
+        <BookingCloser />
+      </div>
+
+      {/* V5 — maximálně přímo k rezervaci, slogan uprostřed */}
+      <div className="home-v5">
+        <section className="v5-hero">
+          <p className="v2-hero__brand">{site.name}</p>
+          <h1 className="v5-hero__title">{site.heroTitle}</h1>
+          <p className="v5-hero__line">{site.aboutShort}</p>
+          <Link href="/objednani" className="btn btn--primary v5-hero__cta">
+            Objednat masáž
+          </Link>
+          <a href={`tel:${site.phoneRaw}`} className="v5-hero__phone">
+            {site.phoneDisplay}
+          </a>
+          <p className="v2-hero__note">
+            {site.openingHoursShort} · {site.openingNote}
+          </p>
+        </section>
+        <section className="v2-section v2-section--alt">
           <div className="v2-section__inner">
-            <h2 className="v2-section__title">Rychlý ceník</h2>
             <div className="v2-prices">
               {pricing.map((row) => (
                 <div key={row.name} className="v2-price">
@@ -193,63 +364,13 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <p className="v2-section__note">{site.specialOffer}</p>
             <Link href="/objednani" className="btn btn--primary v2-section__cta">
               Rezervovat termín
             </Link>
-          </div>
-        </section>
-
-        <section className="v2-section v2-section--alt">
-          <div className="v2-section__inner">
-            <h2 className="v2-section__title">Nejčastější služby</h2>
-            <p className="v2-section__lead">{site.servicesIntro}</p>
-            <div className="v2-services">
-              {v2Services.map((s) => (
-                <Link
-                  key={s.id}
-                  href={`/sluzby#${s.id}`}
-                  className="v2-service"
-                >
-                  <span className="v2-service__img">
-                    <Image src={s.image} alt="" width={120} height={90} />
-                  </span>
-                  <span className="v2-service__body">
-                    <span className="v2-service__title">{s.title}</span>
-                    <span className="v2-service__text">{s.short}</span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <Link href="/sluzby" className="v2-text-link">
-              Všechny služby →
-            </Link>
-          </div>
-        </section>
-
-        <section className="v2-section">
-          <div className="v2-section__inner v2-section__inner--narrow">
-            <blockquote className="v2-quote">
-              „{site.testimonial.quote}“
-              <cite>– {site.testimonial.author}</cite>
-            </blockquote>
-            <div className="v2-contact">
-              <p>
-                <strong>{site.address}</strong>
-              </p>
-              <p>
-                <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
-                {" · "}
-                <a href={`mailto:${site.email}`}>{site.email}</a>
-              </p>
-              <div className="v2-contact__actions">
-                <Link href="/objednani" className="btn btn--primary">
-                  Objednat
-                </Link>
-                <Link href="/kontakt" className="btn btn--ghost">
-                  Mapa a kontakt
-                </Link>
-              </div>
+            <div className="v5-mini-links">
+              <Link href="/sluzby">Služby</Link>
+              <Link href="/o-mne">O mně</Link>
+              <Link href="/kontakt">Kontakt</Link>
             </div>
           </div>
         </section>
