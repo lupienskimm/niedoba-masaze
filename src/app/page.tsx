@@ -86,10 +86,6 @@ export default function HomePage() {
           <div>
             <p className="section__eyebrow">O mně</p>
             <h2 className="section__title">{site.aboutShort}</h2>
-            <p className="section__lead" style={{ marginBottom: 24 }}>
-              Jsem masér z Jablunkova. Specializuji se na záda a pohybové
-              ústrojí — od roku 2012 naplno.
-            </p>
             <Link href="/o-mne" className="btn btn--primary">
               Více o mně
             </Link>
