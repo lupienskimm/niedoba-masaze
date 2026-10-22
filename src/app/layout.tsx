@@ -1,60 +1,20 @@
 import type { Metadata } from "next";
-import {
-  Cormorant_Garamond,
-  DM_Sans,
-  Fraunces,
-  Karla,
-  Manrope,
-  Outfit,
-  Playfair_Display,
-  Barlow_Condensed,
-} from "next/font/google";
+import { Inter, Libre_Baskerville } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { site } from "@/content/site";
-import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
 
-const displayKombi = Fraunces({
-  variable: "--font-display-kombi",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const bodyKombi = DM_Sans({
-  variable: "--font-body-kombi",
+const classic = Libre_Baskerville({
+  variable: "--font-classic",
   subsets: ["latin", "latin-ext"],
-});
-
-const displaySalt = Cormorant_Garamond({
-  variable: "--font-display-salt",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const bodySalt = Outfit({
-  variable: "--font-body-salt",
-  subsets: ["latin", "latin-ext"],
-});
-
-const displayMed = Barlow_Condensed({
-  variable: "--font-display-med",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const bodyMed = Manrope({
-  variable: "--font-body-med",
-  subsets: ["latin", "latin-ext"],
-});
-
-const displayMcg = Playfair_Display({
-  variable: "--font-display-mcg",
-  subsets: ["latin", "latin-ext"],
-});
-
-const bodyMcg = Karla({
-  variable: "--font-body-mcg",
-  subsets: ["latin", "latin-ext"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -88,25 +48,12 @@ export default function RootLayout({
   return (
     <html
       lang="cs"
-      data-theme="kombi"
-      className={[
-        displayKombi.variable,
-        bodyKombi.variable,
-        displaySalt.variable,
-        bodySalt.variable,
-        displayMed.variable,
-        bodyMed.variable,
-        displayMcg.variable,
-        bodyMcg.variable,
-        "h-full antialiased",
-      ].join(" ")}
+      className={`${inter.variable} ${classic.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </ThemeProvider>
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { SiteMap } from "@/components/SiteMap";
 import { nav, site } from "@/content/site";
-import { StyleSwitcher } from "./StyleSwitcher";
 
 export function Footer() {
   return (
@@ -32,18 +32,34 @@ export function Footer() {
             ))}
           </ul>
         </div>
-        <div>
-          <p className="site-footer__heading">Otevírací doba</p>
-          <p>{site.openingHoursFull}</p>
-          <p className="muted">{site.openingNote}</p>
+        <div className="site-footer__map-col">
+          <p className="site-footer__heading">Kde nás najdete</p>
+          <SiteMap size="mini" />
+          <p className="site-footer__map-note">{site.openingHoursShort}</p>
+          <p className="muted site-footer__map-note">{site.openingNote}</p>
         </div>
       </div>
 
-      <StyleSwitcher />
-
       <div className="site-footer__legal">
         <p>{site.businessNote}</p>
-        <p>© 2026 {site.name}</p>
+        <div className="site-footer__legal-right">
+          <p>© 2026 {site.name}</p>
+          <a
+            href="https://azervera.cz"
+            className="site-footer__credit"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="site-footer__credit-text">
+              Build &amp; Designed by AZERVERA
+            </span>
+            <span
+              className="site-footer__credit-logo"
+              role="img"
+              aria-label="AZERVERA"
+            />
+          </a>
+        </div>
       </div>
     </footer>
   );

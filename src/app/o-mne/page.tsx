@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { PageHero } from "@/components/PageHero";
 import { site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -10,24 +11,17 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <div className="page-hero">
-        <div className="page-hero__media">
-          <Image
-            src="/images/hlavicka-ome-2.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-          />
-        </div>
-        <div className="page-hero__shade" />
-        <h1 className="page-hero__title">{site.aboutTitle}</h1>
-      </div>
+      <PageHero title="O MNĚ" />
 
       <section className="section">
-        <div className="wrap split">
-          <div className="split__media">
-            <Image src="/images/omne.jpg" alt="" width={720} height={900} />
+        <div className="wrap split split--about">
+          <div className="split__media split__media--circle">
+            <Image
+              src="/images/omne.jpg"
+              alt="Robert Niedoba"
+              width={480}
+              height={480}
+            />
           </div>
           <div className="prose">
             {site.aboutBody.map((p) => (
@@ -41,14 +35,16 @@ export default function AboutPage() {
       </section>
 
       <section className="section section--alt">
-        <div className="wrap">
-          <p className="section__eyebrow">Speciální nabídka</p>
-          <h2 className="section__title" style={{ maxWidth: "28ch" }}>
-            {site.specialOffer}
-          </h2>
-          <Link href="/objednani" className="btn btn--primary">
-            Domluvte si masáž
-          </Link>
+        <div className="wrap wrap--narrow">
+          <div className="content-center">
+            <p className="section__eyebrow">Speciální nabídka</p>
+            <h2 className="section__title section__title--center">
+              {site.specialOffer}
+            </h2>
+            <Link href="/objednani" className="btn btn--primary">
+              Domluvte si masáž
+            </Link>
+          </div>
         </div>
       </section>
     </>
