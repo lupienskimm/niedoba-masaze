@@ -13,7 +13,6 @@ export function Footer() {
         <div>
           <p className="site-footer__heading">Kontakt</p>
           <ul className="site-footer__list">
-            <li>{site.address}</li>
             <li>
               <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
             </li>
