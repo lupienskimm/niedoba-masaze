@@ -8,7 +8,12 @@ export function MobileLayoutSwitcher() {
   if (!ready) return null;
 
   return (
-    <div className="layout-switcher" role="group" aria-label="Verze mobilního zobrazení">
+    <div
+      className="layout-switcher"
+      role="group"
+      aria-label="Verze webu"
+      title="V1 plný web · V2 rychlá cesta k rezervaci"
+    >
       <button
         type="button"
         className={`layout-switcher__btn${version === "v1" ? " is-active" : ""}`}
