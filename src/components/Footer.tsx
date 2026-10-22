@@ -1,11 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SiteMap } from "@/components/SiteMap";
 import { nav, site } from "@/content/site";
 
 export function Footer() {
+  const pathname = usePathname();
+  const hideFooterMap = pathname.startsWith("/kontakt");
+
   return (
     <footer className="site-footer">
-      <div className="site-footer__grid">
+      <div
+        className={`site-footer__grid${hideFooterMap ? " site-footer__grid--no-map" : ""}`}
+      >
         <div>
           <p className="site-footer__brand">{site.name}</p>
           <p className="site-footer__wish">{site.wish}</p>
@@ -31,12 +39,14 @@ export function Footer() {
             ))}
           </ul>
         </div>
-        <div className="site-footer__map-col">
-          <p className="site-footer__heading">Kde mě najdete</p>
-          <SiteMap size="mini" />
-          <p className="site-footer__map-note">{site.openingHoursShort}</p>
-          <p className="muted site-footer__map-note">{site.openingNote}</p>
-        </div>
+        {!hideFooterMap && (
+          <div className="site-footer__map-col">
+            <p className="site-footer__heading">Kde mě najdete</p>
+            <SiteMap size="mini" />
+            <p className="site-footer__map-note">{site.openingHoursShort}</p>
+            <p className="muted site-footer__map-note">{site.openingNote}</p>
+          </div>
+        )}
       </div>
 
       <div className="site-footer__legal">

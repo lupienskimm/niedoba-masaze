@@ -8,9 +8,8 @@ export function SiteMap({ size = "large" }: SiteMapProps) {
   const isMini = size === "mini";
 
   return (
-    <div className={`site-map${isMini ? " site-map--mini" : ""}`}>
+    <div className={`site-map${isMini ? " site-map--mini" : " site-map--large"}`}>
       <div className="site-map__frame">
-        <div className="site-map__glow" aria-hidden="true" />
         <div className="site-map__viewport">
           <iframe
             title={`Mapa – ${site.address}`}
@@ -19,8 +18,6 @@ export function SiteMap({ size = "large" }: SiteMapProps) {
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
           />
-          <div className="site-map__tint" aria-hidden="true" />
-          <div className="site-map__vignette" aria-hidden="true" />
         </div>
 
         {!isMini && (
