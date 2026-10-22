@@ -33,7 +33,7 @@ export function Footer() {
           </ul>
         </div>
         <div className="site-footer__map-col">
-          <p className="site-footer__heading">Kde nás najdete</p>
+          <p className="site-footer__heading">Kde mě najdete</p>
           <SiteMap size="mini" />
           <p className="site-footer__map-note">{site.openingHoursShort}</p>
           <p className="muted site-footer__map-note">{site.openingNote}</p>

@@ -569,15 +569,18 @@ img {
 
 .site-map__frame {
   position: relative;
-  border-radius: calc(var(--radius) + 4px);
-  padding: 3px;
+  isolation: isolate;
+  border-radius: calc(var(--radius) + 6px);
+  padding: 5px;
   background: linear-gradient(
     135deg,
     var(--brand-deep) 0%,
     var(--brand-mid) 45%,
     var(--brand-light) 100%
   );
-  box-shadow: var(--shadow);
+  box-shadow:
+    0 0 0 1px rgba(11, 107, 58, 0.35),
+    var(--shadow);
 }
 
 .site-map__glow {
@@ -616,9 +619,9 @@ img {
   pointer-events: none;
   background: linear-gradient(
     145deg,
-    rgba(11, 107, 58, 0.18) 0%,
-    rgba(63, 143, 74, 0.08) 40%,
-    rgba(143, 174, 61, 0.14) 100%
+    rgba(11, 107, 58, 0.1) 0%,
+    transparent 45%,
+    rgba(143, 174, 61, 0.08) 100%
   );
   mix-blend-mode: soft-light;
 }
@@ -675,14 +678,17 @@ img {
 /* Mini map in footer */
 .site-map--mini .site-map__frame {
   border-radius: 18px;
-  padding: 2px;
+  padding: 4px;
+  box-shadow:
+    0 0 0 1px rgba(11, 107, 58, 0.4),
+    0 8px 24px rgba(30, 58, 43, 0.12);
 }
 
 .site-map--mini .site-map__viewport {
   aspect-ratio: 1.35 / 1;
   min-height: 0;
-  height: 110px;
-  border-radius: 16px;
+  height: 120px;
+  border-radius: 14px;
 }
 
 .site-map--mini .site-map__glow {

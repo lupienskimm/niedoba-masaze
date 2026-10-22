@@ -43,7 +43,7 @@ export default function HomePage() {
             </p>
             <p className="muted">{site.bookingHint}</p>
             <Link href="/objednani" className="btn btn--primary">
-              Domluvte si masáž
+              Domluvte si u mě masáž
             </Link>
           </div>
         </div>
@@ -87,8 +87,8 @@ export default function HomePage() {
             <p className="section__eyebrow">O mně</p>
             <h2 className="section__title">{site.aboutShort}</h2>
             <p className="section__lead" style={{ marginBottom: 24 }}>
-              Masér z Jablunkova. Specializace na záda a pohybové ústrojí —
-              od roku 2012 naplno.
+              Jsem masér z Jablunkova. Specializuji se na záda a pohybové
+              ústrojí — od roku 2012 naplno.
             </p>
             <Link href="/o-mne" className="btn btn--primary">
               Více o mně

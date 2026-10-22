@@ -24,8 +24,8 @@ export const site = {
     "Po–Ne: 8:00 – 18:00. Mimo otevírací dobu po telefonické domluvě.",
   openingNote: "Pouze na objednání.",
   bookingHint:
-    "Pokud se chcete objednat, můžete SMS nebo e-mailem. Tel: 739 184 325",
-  bookingTitle: "Domluvte si masáž",
+    "Pokud se chcete u mě objednat, napište SMS nebo e-mail. Tel: 739 184 325",
+  bookingTitle: "Domluvte si u mě masáž",
   aboutShort:
     "Nemám rád bolest. Spolu se pokusíme odstranit bolest vašeho těla.",
   aboutTitle: "O mně",
@@ -34,9 +34,9 @@ export const site = {
     "Bylo to období sbírání zkušeností v oboru, kde člověk, pokud má vůli a píli, dokáže změnit svoji tělesnou schránku k nepoznání. V této době jsem absolvoval kurz instruktora fitness u odborníka na slovo vzatého, PaeDr. Tlapáka, jehož vzácné zkušenosti přenáším i do masérské praxe. Na tělo pohlížím jako na celek, kde všechno souvisí se vším. Specializuji se na pohybové ústrojí a bolesti v zádech. Mám radost z každého člověka, kterému mohu pomoci.",
   ],
   specialOffer:
-    "Využijte speciální cenově zvýhodněné nabídky masáže 110 minut za 1500 Kč. Můžete si masáž sestavit na míru ze všech nabízených služeb.",
+    "Nabízím speciální cenově zvýhodněnou masáž 110 minut za 1500 Kč. Můžete si ji sestavit na míru ze všech služeb, které dělám.",
   servicesIntro:
-    "V našem masážním centru je každá masáž přizpůsobena individuálním potřebám klienta.",
+    "Každou masáž přizpůsobuji vašim individuálním potřebám.",
   testimonial: {
     quote:
       "Pan Niedoba je opravdový profesionál, pomohl mi s letitými problémy se ztuhlým svalstvem a klouby, kde i odborníci si nevěděli rady. Všem vřele doporučuji.",

@@ -41,9 +41,9 @@ export default function AboutPage() {
             <h2 className="section__title section__title--center">
               {site.specialOffer}
             </h2>
-            <Link href="/objednani" className="btn btn--primary">
-              Domluvte si masáž
-            </Link>
+          <Link href="/objednani" className="btn btn--primary">
+            Domluvte si u mě masáž
+          </Link>
           </div>
         </div>
       </section>
