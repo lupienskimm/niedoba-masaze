@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Libre_Baskerville } from "next/font/google";
 import { Footer } from "@/components/Footer";
+import { HashRedirect } from "@/components/HashRedirect";
 import { Header } from "@/components/Header";
 import { MobileQuickBar } from "@/components/MobileQuickBar";
 import { NavStackTracker } from "@/components/NavStackTracker";
@@ -56,6 +57,7 @@ export default function RootLayout({
       className={`${inter.variable} ${classic.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <HashRedirect />
         <NavStackTracker />
         <Header />
         <main className="flex-1">{children}</main>
