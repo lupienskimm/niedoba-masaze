@@ -17,6 +17,7 @@ export const site = {
     "Robert Niedoba IČ: 63142678. Podnikatel je zapsán do živnostenského rejstříku vydaným Městským úřadem Jablunkov dne 29. 3. 2017.",
   wish: "Přeji nám všem hodně práce bez stresu, spokojenost v životě, štěstí a zdraví. Život na Zemi bez vody není možný, ať déšť je znovu součástí koloběhu života, stejně jako den a noc.",
   heroTitle: "MASÁŽE – POHLAZENÍ TĚLA I DUŠE",
+  heroTitleShort: "POHLAZENÍ TĚLA I DUŠE",
   heroLead:
     "Masáž je úžasný prostředek, jak uvolnit a oživit unavený organismus, zmírnit stres a předcházet bolestem. Pro obnovu a harmonii Vašich fyzických i duševních sil nabízím široké spektrum masáží.",
   openingHoursShort: "Otevřeno Po–Pá 8.00–18.00",

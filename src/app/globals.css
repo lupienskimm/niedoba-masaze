@@ -1183,27 +1183,102 @@ body {
   align-self: flex-end;
 }
 
-.home-v1 .hero {
+.hero-v1 {
+  width: min(100% - calc(var(--u) * 4), var(--max));
+  margin: calc(var(--u) * 4) auto calc(var(--u) * 2);
+  padding: calc(var(--u) * 5) 0 calc(var(--u) * 4);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: calc(var(--u) * 5);
 }
 
-.home-v1 .hero__content--v1 {
-  margin: auto;
-  align-self: center;
+.hero-v1__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
+  gap: calc(var(--u) * 6);
+  align-items: center;
+}
+
+.hero-v1__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: calc(var(--u) * 2.5);
+}
+
+.hero-v1__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.2vw, 3.35rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.12;
+  text-transform: uppercase;
+  max-width: 12ch;
+  background: linear-gradient(
+    115deg,
+    var(--brand-deep) 0%,
+    var(--brand-mid) 45%,
+    var(--brand-light) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-v1__lead {
+  margin: 0;
+  max-width: 36ch;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.hero-v1__aside {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 40rem;
+  gap: calc(var(--u) * 2.5);
 }
 
-.home-v1 .hero__content--v1 .hero__title,
-.home-v1 .hero__content--v1 .hero__lead {
-  margin-inline: auto;
+.hero-v1__photo {
+  width: min(240px, 100%);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #fff;
+  box-shadow: var(--shadow);
 }
 
-.home-v1 .hero__content--v1 .hero__actions {
+.hero-v1__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-v1__card {
+  margin: 0;
+  width: min(100%, 280px);
+  padding: calc(var(--u) * 2.5) calc(var(--u) * 3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(30, 58, 43, 0.08);
+  box-shadow: var(--shadow);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--brand-ink);
+}
+
+.hero-v1__actions {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: calc(var(--u) * 2);
 }
 
 .hero__brand {

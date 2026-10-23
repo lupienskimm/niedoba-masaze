@@ -145,32 +145,32 @@ export default function HomePage() {
 
       {/* Desktop V1 — plný web */}
       <div className="home-v1">
-        <section className="hero">
-          <div className="hero__media">
-            <Image
-              src="/images/hero-massage.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-            />
-          </div>
-          <div className="hero__shade" />
-          <div className="hero__content hero__content--v1">
-            <h1 className="hero__title reveal">{site.heroTitle}</h1>
-            <p className="hero__lead reveal reveal-delay">{site.heroLead}</p>
-            <div className="hero__actions reveal reveal-delay-2">
-              <Link href="/objednani" className="btn btn--primary">
-                Objednat
-              </Link>
-              <Link
-                href="/sluzby"
-                className="btn btn--ghost"
-                style={{ color: "#fff", borderColor: "rgba(255,255,255,0.55)" }}
-              >
-                Služby
-              </Link>
+        <section className="hero-v1">
+          <div className="hero-v1__grid">
+            <div className="hero-v1__copy reveal">
+              <h1 className="hero-v1__title">{site.heroTitleShort}</h1>
+              <p className="hero-v1__lead">{site.heroLead}</p>
             </div>
+            <aside className="hero-v1__aside reveal reveal-delay">
+              <div className="hero-v1__photo">
+                <Image
+                  src="/images/omne.jpg"
+                  alt="Robert Niedoba"
+                  width={280}
+                  height={280}
+                  priority
+                />
+              </div>
+              <p className="hero-v1__card">{site.aboutShort}</p>
+            </aside>
+          </div>
+          <div className="hero-v1__actions reveal reveal-delay-2">
+            <Link href="/objednani" className="btn btn--primary">
+              Objednat
+            </Link>
+            <Link href="/sluzby" className="btn btn--ghost">
+              Služby
+            </Link>
           </div>
         </section>
 
