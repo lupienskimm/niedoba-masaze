@@ -664,20 +664,20 @@ img {
 
 /* Mini map in footer */
 .site-map--mini {
-  max-width: 180px;
+  max-width: 210px;
 }
 
 .site-map--mini .site-map__frame {
-  border-radius: 12px;
-  padding: 2px;
-  box-shadow: 0 6px 16px rgba(30, 58, 43, 0.1);
+  border-radius: 10px;
+  padding: 1px;
+  box-shadow: 0 4px 12px rgba(30, 58, 43, 0.08);
 }
 
 .site-map--mini .site-map__viewport {
-  aspect-ratio: 1.2 / 1;
+  aspect-ratio: 1.25 / 1;
   min-height: 0;
-  height: 88px;
-  border-radius: 10px;
+  height: 104px;
+  border-radius: 9px;
 }
 
 .site-map__mini-hit {
@@ -691,7 +691,7 @@ img {
   display: grid;
   gap: calc(var(--u) * 1.25);
   align-content: start;
-  max-width: 200px;
+  max-width: 230px;
 }
 
 .site-footer__grid--no-map {
