@@ -31,7 +31,7 @@
   --surface-alt: rgba(255, 255, 255, 0.55);
   --font-display: var(--font-inter), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
-  --font-classic: var(--font-classic), Georgia, serif;
+  --font-classic: Georgia, "Times New Roman", serif;
   --hero-align: flex-start;
   --section-pad: calc(var(--u) * 10) calc(var(--u) * 3);
   --card-bg: rgba(255, 255, 255, 0.72);
@@ -1131,8 +1131,15 @@ body {
     radial-gradient(900px 560px at 100% 18%, rgba(63, 143, 74, 0.2), transparent 55%),
     radial-gradient(800px 520px at 48% 108%, rgba(11, 107, 58, 0.14), transparent 52%),
     radial-gradient(640px 420px at 70% 55%, rgba(143, 174, 61, 0.08), transparent 60%);
-  background-attachment: fixed;
+  background-attachment: scroll;
   background-repeat: no-repeat;
+}
+
+@media (min-width: 861px) {
+  html,
+  body {
+    background-attachment: fixed;
+  }
 }
 
 .site-header {
@@ -1698,8 +1705,12 @@ body {
   }
 }
 
-﻿/* ─── Home: mobile / desktop trees ─── */
+/* ─── Home: mobile / desktop trees (CSS only, both in HTML) ─── */
 .home-mobile {
+  display: block;
+}
+
+.home-desktop {
   display: none;
 }
 
@@ -1708,13 +1719,13 @@ body {
     display: none !important;
   }
 
-  .home-v1 {
-    display: block;
+  .home-desktop {
+    display: block !important;
   }
 }
 
 @media (max-width: 860px) {
-  .home-v1 {
+  .home-desktop {
     display: none !important;
   }
 

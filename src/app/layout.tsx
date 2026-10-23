@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Libre_Baskerville } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { HashRedirect } from "@/components/HashRedirect";
 import { Header } from "@/components/Header";
@@ -11,16 +11,10 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "700"],
   display: "swap",
-});
-
-const classic = Libre_Baskerville({
-  variable: "--font-classic",
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-  preload: false,
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -52,10 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="cs"
-      className={`${inter.variable} ${classic.variable} h-full antialiased`}
-    >
+    <html lang="cs" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <HashRedirect />
         <NavStackTracker />

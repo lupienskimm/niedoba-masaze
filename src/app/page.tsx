@@ -144,17 +144,17 @@ function DesktopHome() {
     <div className="home-v1">
       <section className="hero-v1">
         <div className="hero-v1__grid">
-          <div className="hero-v1__photo reveal">
+          <div className="hero-v1__photo">
             <Image
               src="/images/omne.jpg"
               alt="Robert Niedoba"
               width={640}
               height={800}
-              priority
               sizes="(max-width: 1100px) 42vw, 420px"
+              loading="lazy"
             />
           </div>
-          <div className="hero-v1__copy reveal reveal-delay">
+          <div className="hero-v1__copy">
             <p className="hero-v1__card">{site.aboutShort}</p>
             <div className="hero-v1__stack">
               <h1 className="hero-v1__title">
@@ -192,7 +192,7 @@ function DesktopHome() {
             <p className="section__lead">{site.servicesIntro}</p>
           </div>
           <div className="services-grid services-grid--equal">
-            {services.map((s, i) => (
+            {services.map((s) => (
               <Link key={s.id} href={`/sluzby/${s.id}`} className="service-card">
                 <div className="service-card__img">
                   <Image
@@ -201,7 +201,7 @@ function DesktopHome() {
                     width={400}
                     height={300}
                     sizes="(max-width: 960px) 45vw, 22vw"
-                    loading={i < 2 ? "eager" : "lazy"}
+                    loading="lazy"
                   />
                 </div>
                 <h3 className="service-card__title">{s.title}</h3>
