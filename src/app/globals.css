@@ -1269,11 +1269,10 @@ body {
   margin: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.35em;
+  flex-direction: column;
+  gap: 0.08em;
   font-family: var(--font-display);
-  font-size: clamp(1.55rem, 3.4vw, 2.85rem);
+  font-size: clamp(2rem, 4.2vw, 3.35rem);
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1.12;
@@ -1290,15 +1289,17 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.hero-v1__title-left {
-  text-align: left;
-  flex: 0 1 auto;
+.hero-v1__title-line {
+  display: block;
+  width: 100%;
 }
 
-.hero-v1__title-right {
+.hero-v1__title-line--left {
+  text-align: left;
+}
+
+.hero-v1__title-line--right {
   text-align: right;
-  flex: 0 1 auto;
-  margin-left: auto;
 }
 
 .hero-v1__lead {

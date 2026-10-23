@@ -159,8 +159,12 @@ function DesktopHome() {
             <p className="hero-v1__card">{site.aboutShort}</p>
             <div className="hero-v1__stack">
               <h1 className="hero-v1__title">
-                <span className="hero-v1__title-left">POHLAZENÍ</span>
-                <span className="hero-v1__title-right">TĚLA I DUŠE</span>
+                <span className="hero-v1__title-line hero-v1__title-line--left">
+                  POHLAZENÍ
+                </span>
+                <span className="hero-v1__title-line hero-v1__title-line--right">
+                  TĚLA I DUŠE
+                </span>
               </h1>
               <p className="hero-v1__lead">{site.heroLead}</p>
               <div className="hero-v1__actions">
