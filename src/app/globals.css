@@ -51,12 +51,13 @@
 
 html {
   scroll-behavior: smooth;
+  min-height: 100%;
+  background: var(--bg);
 }
 
 body {
   margin: 0;
   min-height: 100%;
-  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 16px;
@@ -346,7 +347,7 @@ img {
 }
 
 .section--alt {
-  background: var(--surface-alt);
+  background: transparent;
 }
 
 .section__head {
@@ -1109,12 +1110,16 @@ img {
 /* ═══════════════════════════════════════════
    KOMBI ONLY — modern rounded / out of the box
    ═══════════════════════════════════════════ */
+html,
 body {
-  background:
-    radial-gradient(900px 500px at 8% -10%, rgba(143, 174, 61, 0.28), transparent 60%),
-    radial-gradient(700px 480px at 100% 12%, rgba(63, 143, 74, 0.18), transparent 55%),
-    radial-gradient(600px 400px at 50% 100%, rgba(11, 107, 58, 0.1), transparent 50%),
-    var(--bg);
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1100px 640px at 6% -8%, rgba(143, 174, 61, 0.3), transparent 58%),
+    radial-gradient(900px 560px at 100% 18%, rgba(63, 143, 74, 0.2), transparent 55%),
+    radial-gradient(800px 520px at 48% 108%, rgba(11, 107, 58, 0.14), transparent 52%),
+    radial-gradient(640px 420px at 70% 55%, rgba(143, 174, 61, 0.08), transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 .site-header {
@@ -1793,7 +1798,7 @@ body {
 }
 
 .v2-section--alt {
-  background: rgba(255, 255, 255, 0.45);
+  background: transparent;
 }
 
 .v2-section__inner {
