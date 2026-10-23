@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { services } from "@/content/services";
 
-const SERVICE_IDS = new Set(services.map((s) => s.id));
+const SERVICE_IDS = new Set<string>(services.map((s) => s.id));
 
 /** Turns leftover /sluzby#id bookmarks into /sluzby/id and strips other hashes. */
 export function HashRedirect() {
