@@ -48,7 +48,6 @@ export const nav = [
   { href: "/", label: "Domů" },
   { href: "/sluzby", label: "Služby" },
   { href: "/o-mne", label: "O mně" },
-  { href: "/objednani", label: "Objednání" },
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
 
