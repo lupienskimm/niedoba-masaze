@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HomeDesktop } from "@/components/HomeDesktop";
 import { HomeShell } from "@/components/HomeShell";
+import { OpeningHoursLive } from "@/components/OpeningHoursLive";
 import { pricing, services, site } from "@/content/site";
 
 const featuredIds = [
@@ -141,7 +141,7 @@ function PhotoIntro({
   );
 }
 
-function DesktopV1() {
+function DesktopHome() {
   return (
     <div className="home-v1">
       <section className="hero-v1">
@@ -173,16 +173,8 @@ function DesktopV1() {
       </section>
 
       <section className="section">
-        <div className="wrap">
-          <div className="band">
-            <p>
-              <strong>{site.openingHoursShort}</strong>
-            </p>
-            <p className="muted">{site.bookingHint}</p>
-            <Link href="/objednani" className="btn btn--primary">
-              Domluvte si u mě masáž
-            </Link>
-          </div>
+        <div className="wrap wrap--narrow">
+          <OpeningHoursLive />
         </div>
       </section>
 
@@ -283,114 +275,23 @@ function DesktopV1() {
   );
 }
 
-function DesktopV2() {
-  return (
-    <div className="home-v2">
-      <PhotoIntro title={site.aboutShort} />
-      <QuickPricing />
-      <FeaturedServices />
-      <BookingCloser />
-    </div>
-  );
-}
-
-function DesktopV3() {
-  return (
-    <div className="home-v3">
-      <section className="hero hero--v3">
-        <div className="hero__media">
-          <Image
-            src="/images/hero-massage.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-          />
-        </div>
-        <div className="hero__shade" />
-        <div className="hero__content hero__content--center">
-          <p className="hero__brand">{site.name}</p>
-          <h1 className="hero__title hero__title--xl">{site.heroTitle}</h1>
-          <p className="hero__lead">{site.aboutShort}</p>
-          <div className="hero__actions">
-            <Link href="/objednani" className="btn btn--primary">
-              Objednat masáž
-            </Link>
-            <a
-              href={`tel:${site.phoneRaw}`}
-              className="btn btn--ghost"
-              style={{ color: "#fff", borderColor: "rgba(255,255,255,0.55)" }}
-            >
-              Zavolat
-            </a>
-          </div>
-          <p className="hero__hours">{site.openingHoursShort}</p>
-        </div>
-      </section>
-
-      <section className="v4-intro">
-        <div className="v4-intro__photo">
-          <Image
-            src="/images/omne.jpg"
-            alt="Robert Niedoba"
-            width={360}
-            height={360}
-            sizes="280px"
-          />
-        </div>
-        <div className="v4-intro__copy">
-          <p className="v2-hero__brand">O mně</p>
-          <h2 className="v4-intro__title">{site.aboutShort}</h2>
-          <p className="v4-intro__lead">{site.heroLead}</p>
-          <Link href="/o-mne" className="btn btn--primary">
-            Více o mně
-          </Link>
-        </div>
-      </section>
-
-      <QuickPricing cta="Domluvte si u mě masáž" />
-      <FeaturedServices />
-      <BookingCloser />
-    </div>
-  );
-}
-
-function DesktopV4() {
-  return (
-    <div className="home-v4">
-      <PhotoIntro title={site.heroTitle} />
-      <section className="v4-atmosphere">
-        <div className="v4-atmosphere__media">
-          <Image src="/images/hero-massage.jpg" alt="" fill sizes="100vw" />
-          <div className="v4-atmosphere__shade" />
-          <p className="v4-atmosphere__text">{site.aboutShort}</p>
-        </div>
-      </section>
-      <QuickPricing />
-      <FeaturedServices />
-      <BookingCloser />
-    </div>
-  );
-}
-
 export default function HomePage() {
   return (
     <HomeShell
       mobile={
         <>
           <PhotoIntro title={site.aboutShort} showHeroCtas />
+          <section className="v2-section">
+            <div className="v2-section__inner">
+              <OpeningHoursLive />
+            </div>
+          </section>
           <QuickPricing />
           <FeaturedServices />
           <BookingCloser />
         </>
       }
-      desktop={
-        <HomeDesktop
-          v1={<DesktopV1 />}
-          v2={<DesktopV2 />}
-          v3={<DesktopV3 />}
-          v4={<DesktopV4 />}
-        />
-      }
+      desktop={<DesktopHome />}
     />
   );
 }
