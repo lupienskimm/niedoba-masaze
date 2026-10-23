@@ -50,72 +50,7 @@ export const nav = [
   { href: "/kontakt", label: "Kontakt" },
 ] as const;
 
-export const services = [
-  {
-    id: "obnova-tela",
-    title: "Obnova těla",
-    image: "/images/svc-obnova.jpg",
-    short:
-      "Diagnostika těla, např. objevení slabých svalů, bolestivých míst, degenerace chrupavek apod.",
-    full: "Diagnostika těla, např. objevení slabých svalů, bolestivých míst, degenerace chrupavek apod. Pojmenování příčin vzniku bloků na jednotlivých částech těla. Doporučení, jak se v budoucnu vyhnout zdravotním problémům a předcházet tak bolestem. Obnova těla zahrnuje rozmasírování diagnostikovaných partií.",
-  },
-  {
-    id: "relaxace",
-    title: "Relaxace",
-    image: "/images/service-relaxace.jpg",
-    short:
-      "Relaxační povrchová uvolňovací masáž s hudbou a vonnými oleji. Cílem této masáže je uvolnění těla i mysli, zbavit se stresu všedních dnů.",
-    full: "Relaxační povrchová uvolňovací masáž s hudbou a vonnými oleji. Cílem této masáže je uvolnění těla i mysli, zbavit se stresu všedních dnů.",
-  },
-  {
-    id: "akupresura",
-    title: "Akupresura",
-    image: "/images/svc-akupresura.jpg",
-    short:
-      "Známá akupresurní metoda, která působením tlaku na dané body odblokuje problémy jak s pohybovým ústrojím, tak s vnitřními orgány.",
-    full: "Známá akupresurní metoda, která působením tlaku na dané body odblokuje problémy jak s pohybovým ústrojím, tak s vnitřními orgány.",
-  },
-  {
-    id: "hloubkova",
-    title: "Hloubková masáž",
-    image: "/images/svc-hloubkova.jpg",
-    short:
-      "Jedná se o masáž do hlubších vrstev svalových vláken s efektivním výsledkem masáže.",
-    full: "Jedná se o masáž do hlubších vrstev svalových vláken s efektivním výsledkem masáže.",
-  },
-  {
-    id: "lavove-kameny",
-    title: "Lávové kameny",
-    image: "/images/service-kameny.jpg",
-    short:
-      "Nahřáté lávové kameny uvolní svalové partie na celém těle. Mají pozitivní vliv na centrální nervový systém.",
-    full: "Nahřáté lávové kameny uvolní svalové partie na celém těle. Mají pozitivní vliv na centrální nervový systém.",
-  },
-  {
-    id: "autotrakcni-lehatko",
-    title: "Autotrakční lehátko",
-    image: "/images/lehatko.jpg",
-    short:
-      "Překlápěcí a velmi populární nástroj k obnově meziobratlových plotének.",
-    full: "Překlápěcí a velmi populární nástroj k obnově meziobratlových plotének. Překlápěním pacienta postupně v různých úhlech (s fixací nohou) dochází k celkovému uvolnění páteře díky změně polohy těla.",
-  },
-  {
-    id: "sport",
-    title: "Sport",
-    image: "/images/service-sport.jpg",
-    short:
-      "Pro aktivní sportovce na rychlé uvolnění spasmu a odvod kyseliny mléčné ze svalů, jde hlavně o techniku tepání a chvění.",
-    full: "Pro aktivní sportovce na rychlé uvolnění spasmu a odvod kyseliny mléčné ze svalů, jde hlavně o techniku tepání a chvění.",
-  },
-  {
-    id: "masaz-nohou",
-    title: "Masáž nohou",
-    image: "/images/svc-nohy.jpg",
-    short:
-      "Zlepšuje akutní i chronické stavy a je účinnou prevencí mnohých onemocnění.",
-    full: "Lymfatická masáž je detoxikační masáž, která podporuje pohyb lymfy v těle.\n\nTím napomáhá nejen jejímu čištění od toxických látek, ale i zvýšení imunity nebo odstraňování celulitidy (pomerančová kůže). Velký vliv má i na psychiku – zlepšuje náladu a předchází depresi. Lymfa sama o sobě nemá žádnou „pumpu“ jako má krev. Je tedy závislá na pohybu svalů. Proto je hned po sportu a cvičení masáž ideálním pomocníkem.",
-  },
-] as const;
+export { services, brands } from "@/content/services";
 
 export const pricing = [
   { name: "Masáž 20 min.", price: "600,- Kč" },

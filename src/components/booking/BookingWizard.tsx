@@ -34,6 +34,7 @@ export function BookingWizard() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
+  const [openServiceId, setOpenServiceId] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
   useEffect(() => {
@@ -84,6 +85,10 @@ export function BookingWizard() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!selectedSlot) return;
+    if (!service) {
+      setError("Vyberte prosím službu.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -95,7 +100,7 @@ export function BookingWizard() {
           name,
           email,
           phone,
-          service: service || undefined,
+          service,
           note: note || undefined,
         }),
       });
@@ -127,7 +132,7 @@ export function BookingWizard() {
         <h2 className="booking-done__title">Rezervace je hotová</h2>
         <p>
           Termín <strong>{done.date}</strong> v <strong>{done.time}</strong> je
-          zarezervovaný. Potvrzení pošleme e-mailem (po napojení Resend).
+          zarezervovaný. Potvrzení přijde e-mailem.
         </p>
         <p className="muted">
           Provozovna: {site.address}. Telefon:{" "}
@@ -144,6 +149,7 @@ export function BookingWizard() {
             setName("");
             setEmail("");
             setPhone("");
+            setService("");
             setNote("");
           }}
         >
@@ -156,6 +162,9 @@ export function BookingWizard() {
   return (
     <div className="booking-wizard">
       <div className="booking-cal">
+        <p className="booking-cal__legend">
+          Den se zeleným označením je volný termín.
+        </p>
         <div className="booking-cal__head">
           <button
             type="button"
@@ -231,7 +240,7 @@ export function BookingWizard() {
       <div className="booking-panel">
         {!selectedDate && (
           <p className="booking-panel__hint">
-            Vyberte den se zeleným označením — to jsou dny s volnými termíny.
+            Nejprve vyberte den v kalendáři.
           </p>
         )}
 
@@ -265,6 +274,51 @@ export function BookingWizard() {
             <h3 className="booking-panel__title">
               Objednávka · {selectedSlot.date} {selectedSlot.time}
             </h3>
+
+            <fieldset className="booking-services">
+              <legend>Výběr služby</legend>
+              {services.map((s) => {
+                const open = openServiceId === s.id;
+                const selected = service === s.title;
+                return (
+                  <div
+                    key={s.id}
+                    className={`booking-service${selected ? " is-selected" : ""}`}
+                  >
+                    <div className="booking-service__row">
+                      <label className="booking-service__pick">
+                        <input
+                          type="radio"
+                          name="service"
+                          required
+                          checked={selected}
+                          onChange={() => setService(s.title)}
+                        />
+                        <span>{s.title}</span>
+                      </label>
+                      <button
+                        type="button"
+                        className="booking-service__toggle"
+                        aria-expanded={open}
+                        onClick={() =>
+                          setOpenServiceId(open ? null : s.id)
+                        }
+                      >
+                        {open ? "Skrýt" : "Více"}
+                      </button>
+                    </div>
+                    {open && (
+                      <div className="booking-service__detail">
+                        {s.full.split("\n\n").map((p) => (
+                          <p key={p.slice(0, 40)}>{p}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </fieldset>
+
             <label className="booking-field">
               <span>Jméno a příjmení</span>
               <input
@@ -293,17 +347,6 @@ export function BookingWizard() {
                 onChange={(e) => setPhone(e.target.value)}
                 autoComplete="tel"
               />
-            </label>
-            <label className="booking-field">
-              <span>Služba (volitelné)</span>
-              <select value={service} onChange={(e) => setService(e.target.value)}>
-                <option value="">— vyberte —</option>
-                {services.map((s) => (
-                  <option key={s.id} value={s.title}>
-                    {s.title}
-                  </option>
-                ))}
-              </select>
             </label>
             <label className="booking-field">
               <span>Poznámka</span>

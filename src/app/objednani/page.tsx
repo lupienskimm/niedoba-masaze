@@ -18,7 +18,7 @@ export default function BookingPage() {
           <div className="booking-intro">
             <p className="section__lead section__lead--center">
               Vyberte volný den v kalendáři, čas a vyplňte formulář. Potvrzení
-              přijde vám i panu Niedobovi e-mailem.
+              přijde e-mailem.
             </p>
             <p className="muted content-center">{site.openingHoursFull}</p>
           </div>
