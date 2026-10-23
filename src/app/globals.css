@@ -1663,134 +1663,28 @@ body {
 }
 
 .v2-hero {
-  position: relative;
-  isolation: isolate;
-  min-height: min(78vh, 640px);
-  display: flex;
-  align-items: stretch;
-  overflow: hidden;
-  color: #fff;
-}
-
-.v2-hero__media {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.v2-hero__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.06);
-  filter: blur(2px);
-}
-
-.v2-hero__glass {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(11, 107, 58, 0.42) 0%,
-      rgba(30, 58, 43, 0.28) 45%,
-      rgba(143, 174, 61, 0.26) 100%
-    ),
-    rgba(255, 255, 255, 0.18);
-  border: 0;
-  backdrop-filter: blur(28px) saturate(1.35) brightness(1.05);
-  -webkit-backdrop-filter: blur(28px) saturate(1.35) brightness(1.05);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.v2-hero__split {
-  position: relative;
-  z-index: 2;
-  width: min(100% - calc(var(--u) * 4), 980px);
-  margin-inline: auto;
-  padding-block: calc(var(--u) * 7);
-  display: grid;
-  grid-template-columns: minmax(120px, 0.9fr) 1.2fr;
-  gap: calc(var(--u) * 3);
-  align-items: center;
-}
-
-.v2-hero__person {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 5) calc(var(--u) * 3) calc(var(--u) * 6);
+  gap: calc(var(--u) * 1.5);
 }
 
 .v2-hero__photo {
-  width: min(148px, 36vw);
-  height: min(148px, 36vw);
+  width: min(168px, 42vw);
+  height: min(168px, 42vw);
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.88);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
-  flex-shrink: 0;
+  border: 4px solid #fff;
+  box-shadow: var(--shadow);
+  margin-bottom: calc(var(--u) * 1);
 }
 
 .v2-hero__photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.v2-hero__caption {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: clamp(0.95rem, 2.4vw, 1.2rem);
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  max-width: 18ch;
-  color: #fff;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.25);
-}
-
-.v2-hero__copy {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: calc(var(--u) * 2.5);
-}
-
-.v2-hero__lead {
-  margin: 0;
-  font-size: clamp(0.95rem, 2.2vw, 1.08rem);
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.96);
-  max-width: 42ch;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
-}
-
-.v2-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: calc(var(--u) * 1.5);
-  width: 100%;
-}
-
-.v2-hero__cta {
-  text-decoration: none;
-  min-width: 7.5rem;
-}
-
-.v2-hero__cta.btn--ghost {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.08);
 }
 
 .v2-hero__brand {
@@ -1811,6 +1705,30 @@ body {
   letter-spacing: -0.02em;
   line-height: 1.25;
   color: var(--brand-ink);
+}
+
+.v2-hero__meta {
+  margin: calc(var(--u) * 1) 0 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.v2-hero__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.v2-hero__actions {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  width: min(100%, 380px);
+  margin-top: calc(var(--u) * 2);
+}
+
+.v2-hero__cta {
+  width: 100%;
+  text-decoration: none;
 }
 
 .v2-section {
@@ -2131,43 +2049,10 @@ body {
   .site-footer__grid--no-map { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 520px) {
-  .v2-hero__split {
-    grid-template-columns: 1fr;
-    gap: calc(var(--u) * 4);
-    padding-block: calc(var(--u) * 6);
-    text-align: center;
-  }
-
-  .v2-hero__copy {
-    align-items: center;
-    text-align: center;
-  }
-
-  .v2-hero__actions {
-    justify-content: center;
-  }
-
-  .v2-hero__caption {
-    max-width: 24ch;
-  }
-}
-
 @media (min-width: 861px) {
-  .v2-hero {
-    min-height: min(82vh, 720px);
-  }
-
-  .v2-hero__split {
-    gap: calc(var(--u) * 6);
-    padding-block: calc(var(--u) * 9);
-  }
-
-  .v2-hero__photo {
-    width: 200px;
-    height: 200px;
-  }
-
+  .v2-hero { padding-block: calc(var(--u) * 8) calc(var(--u) * 7); }
+  .v2-hero__photo { width: 200px; height: 200px; }
+  .v2-hero__actions { grid-template-columns: 1fr 1fr; width: min(100%, 520px); }
   .v2-section { padding-block: calc(var(--u) * 7); }
   .v4-intro {
     grid-template-columns: minmax(240px, 320px) 1fr;
