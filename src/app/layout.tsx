@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { HashRedirect } from "@/components/HashRedirect";
 import { Header } from "@/components/Header";
@@ -7,16 +6,6 @@ import { MobileQuickBar } from "@/components/MobileQuickBar";
 import { NavStackTracker } from "@/components/NavStackTracker";
 import { site } from "@/content/site";
 import "./globals.css";
-
-/** Single static weight — one file, optional so text paints immediately. */
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin-ext"],
-  weight: "700",
-  display: "optional",
-  preload: true,
-  adjustFontFallback: true,
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.masaze-niedoba.cz"),
@@ -47,9 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="cs" className={`${inter.variable} h-full antialiased`}>
+    <html lang="cs" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        {/* Critical: hide unused home tree before main CSS loads (fixes LCP). */}
         <style
           dangerouslySetInnerHTML={{
             __html:
