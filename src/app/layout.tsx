@@ -49,6 +49,13 @@ export default function RootLayout({
   return (
     <html lang="cs" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        {/* Critical: hide unused home tree before main CSS loads (fixes LCP). */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              ".home-desktop{display:none}.home-mobile{display:block}@media (min-width:861px){.home-mobile{display:none!important}.home-desktop{display:block!important}}",
+          }}
+        />
         <HashRedirect />
         <NavStackTracker />
         <Header />
