@@ -1183,6 +1183,29 @@ body {
   align-self: flex-end;
 }
 
+.home-v1 .hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-v1 .hero__content--v1 {
+  margin: auto;
+  align-self: center;
+  align-items: center;
+  text-align: center;
+  max-width: 40rem;
+}
+
+.home-v1 .hero__content--v1 .hero__title,
+.home-v1 .hero__content--v1 .hero__lead {
+  margin-inline: auto;
+}
+
+.home-v1 .hero__content--v1 .hero__actions {
+  justify-content: center;
+}
+
 .hero__brand {
   font-size: clamp(2rem, 5vw, 3.5rem);
   background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0.75));

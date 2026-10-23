@@ -162,10 +162,9 @@ export default function HomePage() {
             />
           </div>
           <div className="hero__shade" />
-          <div className="hero__content">
-            <p className="hero__brand reveal">{site.name}</p>
-            <h1 className="hero__title reveal reveal-delay">{site.heroTitle}</h1>
-            <p className="hero__lead reveal reveal-delay-2">{site.heroLead}</p>
+          <div className="hero__content hero__content--v1">
+            <h1 className="hero__title reveal">{site.heroTitle}</h1>
+            <p className="hero__lead reveal reveal-delay">{site.heroLead}</p>
             <div className="hero__actions reveal reveal-delay-2">
               <Link href="/objednani" className="btn btn--primary">
                 Objednat
