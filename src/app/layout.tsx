@@ -8,11 +8,11 @@ import { NavStackTracker } from "@/components/NavStackTracker";
 import { site } from "@/content/site";
 import "./globals.css";
 
+/** One variable font file (latin-ext covers Czech) — avoids 2× static weight files. */
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "700"],
-  display: "swap",
+  subsets: ["latin-ext"],
+  display: "optional",
   preload: true,
   adjustFontFallback: true,
 });

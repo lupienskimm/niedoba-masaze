@@ -29,6 +29,7 @@ function FeaturedServices() {
                   width={120}
                   height={90}
                   sizes="120px"
+                  loading="lazy"
                 />
               </span>
               <span className="v2-service__body">
@@ -113,8 +114,8 @@ function PhotoIntro({
           alt="Robert Niedoba"
           width={220}
           height={220}
-          priority
           sizes="168px"
+          fetchPriority="low"
         />
       </div>
       <p className="v2-hero__brand">{site.name}</p>

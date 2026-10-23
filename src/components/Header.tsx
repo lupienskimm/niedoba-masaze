@@ -39,7 +39,6 @@ export function Header() {
               width={44}
               height={45}
               className="site-logo__mark"
-              priority
             />
             <Image
               src="/logos/wordmark.svg"
@@ -47,7 +46,6 @@ export function Header() {
               width={200}
               height={29}
               className="site-logo__word"
-              priority
             />
           </Link>
 
