@@ -59,7 +59,6 @@ function QuickPricing({ cta = "Rezervovat termín" }: { cta?: string }) {
             </div>
           ))}
         </div>
-        <p className="v2-section__note">{site.specialOffer}</p>
         <Link href="/objednani" className="btn btn--primary v2-section__cta">
           {cta}
         </Link>
@@ -224,7 +223,6 @@ function DesktopHome() {
                 </div>
               ))}
             </div>
-            <p className="muted content-center__note">{site.specialOffer}</p>
           </div>
         </div>
       </section>

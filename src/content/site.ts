@@ -32,8 +32,6 @@ export const site = {
     "Masérskou praxi jsem započal budovat v roce 2012. Postupem času se z vedlejší činnosti při zaměstnání stala práce na plný úvazek. Vše se začalo odvíjet již v roce 1996, kdy jsem absolvoval kurz u vynikající PaeDr. Ježkové v Ústí nad Labem, následoval kurz ájurvédy a základní kurz aromaterapie opět u výborného učitele pana Karla Hádka. Nicméně od tohoto okamžiku život sám ukázal jinou cestu, a to cestu instruktora fitness na krásných 10 let.",
     "Bylo to období sbírání zkušeností v oboru, kde člověk, pokud má vůli a píli, dokáže změnit svoji tělesnou schránku k nepoznání. V této době jsem absolvoval kurz instruktora fitness u odborníka na slovo vzatého, PaeDr. Tlapáka, jehož vzácné zkušenosti přenáším i do masérské praxe. Na tělo pohlížím jako na celek, kde všechno souvisí se vším. Specializuji se na pohybové ústrojí a bolesti v zádech. Mám radost z každého člověka, kterému mohu pomoci.",
   ],
-  specialOffer:
-    "Nabízím speciální cenově zvýhodněnou masáž 110 minut za 1500 Kč. Můžete si ji sestavit na míru ze všech služeb, které dělám.",
   servicesIntro:
     "Každou masáž přizpůsobuji vašim individuálním potřebám.",
   testimonial: {

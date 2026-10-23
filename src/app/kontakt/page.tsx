@@ -42,13 +42,6 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="section section--alt">
-        <div className="wrap wrap--narrow">
-          <div className="content-center">
-            <p className="section__lead section__lead--center">{site.wish}</p>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

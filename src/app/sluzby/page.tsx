@@ -43,7 +43,6 @@ export default function ServicesPage() {
                 </div>
               ))}
             </div>
-            <p className="muted content-center__note">{site.specialOffer}</p>
             <Link href="/objednani" className="btn btn--primary">
               Domluvte si u mě masáž
             </Link>

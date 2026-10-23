@@ -53,10 +53,6 @@ export default function AboutPage() {
       <section className="section section--alt">
         <div className="wrap wrap--narrow">
           <div className="content-center">
-            <p className="section__eyebrow">Speciální nabídka</p>
-            <h2 className="section__title section__title--center">
-              {site.specialOffer}
-            </h2>
             <Link href="/objednani" className="btn btn--primary">
               Domluvte si u mě masáž
             </Link>

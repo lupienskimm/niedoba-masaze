@@ -48,6 +48,8 @@ export function Footer() {
         )}
       </div>
 
+      <p className="site-footer__wish">{site.wish}</p>
+
       <div className="site-footer__legal">
         <p className="site-footer__copy">© 2026 {site.name}</p>
         <p className="site-footer__business">{site.businessNote}</p>
