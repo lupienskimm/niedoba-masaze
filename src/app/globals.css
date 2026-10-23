@@ -732,6 +732,8 @@ img {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .page-nav__btn {
