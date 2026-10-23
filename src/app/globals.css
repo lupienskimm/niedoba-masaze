@@ -2700,19 +2700,6 @@ body:has(.site-nav-overlay.is-open) .mobile-quickbar {
   }
 }
 
-.sprava-login {
-  max-width: 380px;
-  margin: calc(var(--u) * 6) auto;
-  padding: calc(var(--u) * 4);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--u) * 2);
-}
-
-.sprava-login__title,
 .sprava__title {
   margin: 0;
   font-size: clamp(1.6rem, 3vw, 2.2rem);

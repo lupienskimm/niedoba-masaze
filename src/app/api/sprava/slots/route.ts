@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { isSpravaAuthed } from "@/lib/booking/auth";
 import {
   loadStore,
   manualPhoneBooking,
@@ -11,18 +10,11 @@ import {
 } from "@/lib/booking/store";
 
 export async function GET() {
-  if (!(await isSpravaAuthed())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   const store = await loadStore();
   return NextResponse.json(store);
 }
 
 export async function POST(request: Request) {
-  if (!(await isSpravaAuthed())) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const body = (await request.json()) as {
     action?: "add" | "remove" | "removeTimes" | "restore" | "phoneBook";
     date?: string;

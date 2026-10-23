@@ -146,7 +146,7 @@ export function SpravaClient() {
           <h1 className="sprava__title">Správa termínů</h1>
           <p className="muted">
             Přidejte nebo odeberte volné časy. Když někdo zavolá, zapište rezervaci
-            sami — termín zmizí z online kalendáře. Heslo doplníme později.
+            sami — termín zmizí z online kalendáře.
           </p>
         </div>
       </div>

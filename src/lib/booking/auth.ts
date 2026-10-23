@@ -4,9 +4,12 @@ import { createHmac, timingSafeEqual } from "crypto";
 const COOKIE = "niedoba_sprava";
 const MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
-/** Temporary: správa is open without password. Re-enable when SPRAVA_REQUIRE_PASSWORD=1. */
+/**
+ * Správa is currently open without password (no login UI).
+ * Later: set SPRAVA_REQUIRE_PASSWORD=1 and restore login form.
+ */
 export function isSpravaPasswordRequired() {
-  return process.env.SPRAVA_REQUIRE_PASSWORD === "1";
+  return false;
 }
 
 function secret() {
@@ -32,17 +35,7 @@ export function checkPassword(password: string) {
 }
 
 export async function isSpravaAuthed() {
-  if (!isSpravaPasswordRequired()) return true;
-  const jar = await cookies();
-  const value = jar.get(COOKIE)?.value;
-  if (!value) return false;
-  const expected = signSession(process.env.SPRAVA_PASSWORD || "niedoba2026");
-  if (value.length !== expected.length) return false;
-  try {
-    return timingSafeEqual(Buffer.from(value), Buffer.from(expected));
-  } catch {
-    return value === expected;
-  }
+  return true;
 }
 
 export async function setSpravaSession() {
