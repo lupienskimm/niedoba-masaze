@@ -1268,14 +1268,16 @@ body {
 .hero-v1__title {
   margin: 0;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.35em;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 4.2vw, 3.35rem);
+  font-size: clamp(1.55rem, 3.4vw, 2.85rem);
   font-weight: 800;
   letter-spacing: 0.04em;
   line-height: 1.12;
   text-transform: uppercase;
-  text-align: justify;
-  text-align-last: center;
   background: linear-gradient(
     115deg,
     var(--brand-deep) 0%,
@@ -1286,6 +1288,17 @@ body {
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
+}
+
+.hero-v1__title-left {
+  text-align: left;
+  flex: 0 1 auto;
+}
+
+.hero-v1__title-right {
+  text-align: right;
+  flex: 0 1 auto;
+  margin-left: auto;
 }
 
 .hero-v1__lead {

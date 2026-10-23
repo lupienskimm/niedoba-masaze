@@ -158,7 +158,10 @@ function DesktopHome() {
           <div className="hero-v1__copy reveal reveal-delay">
             <p className="hero-v1__card">{site.aboutShort}</p>
             <div className="hero-v1__stack">
-              <h1 className="hero-v1__title">{site.heroTitleShort}</h1>
+              <h1 className="hero-v1__title">
+                <span className="hero-v1__title-left">POHLAZENÍ</span>
+                <span className="hero-v1__title-right">TĚLA I DUŠE</span>
+              </h1>
               <p className="hero-v1__lead">{site.heroLead}</p>
               <div className="hero-v1__actions">
                 <Link href="/objednani" className="btn btn--primary">
