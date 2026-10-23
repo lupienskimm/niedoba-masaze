@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <>
+    <div className="page-kontakt">
       <PageHero title="KONTAKT" />
 
       <section className="section">
@@ -41,7 +41,6 @@ export default function ContactPage() {
           <SiteMap size="large" />
         </div>
       </section>
-
-    </>
+    </div>
   );
 }
