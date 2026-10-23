@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FooterHours } from "@/components/FooterHours";
 import { SiteMap } from "@/components/SiteMap";
 import { nav, site } from "@/content/site";
 
@@ -16,6 +17,7 @@ export function Footer() {
       >
         <div>
           <p className="site-footer__brand">{site.name}</p>
+          <FooterHours />
         </div>
         <div>
           <p className="site-footer__heading">Kontakt</p>
@@ -42,7 +44,6 @@ export function Footer() {
           <div className="site-footer__map-col">
             <p className="site-footer__heading">Kde mě najdete</p>
             <SiteMap size="mini" />
-            <p className="site-footer__map-note">{site.openingHoursShort}</p>
           </div>
         )}
       </div>

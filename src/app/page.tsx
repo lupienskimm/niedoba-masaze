@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HomeShell } from "@/components/HomeShell";
-import { OpeningHoursLive } from "@/components/OpeningHoursLive";
 import { pricing, services, site } from "@/content/site";
 
 const featuredIds = [
@@ -172,12 +171,6 @@ function DesktopHome() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="wrap wrap--narrow">
-          <OpeningHoursLive />
-        </div>
-      </section>
-
       <section className="section section--alt">
         <div className="wrap">
           <div className="section__head section__head--center">
@@ -281,11 +274,6 @@ export default function HomePage() {
       mobile={
         <>
           <PhotoIntro title={site.aboutShort} showHeroCtas />
-          <section className="v2-section">
-            <div className="v2-section__inner">
-              <OpeningHoursLive />
-            </div>
-          </section>
           <QuickPricing />
           <FeaturedServices />
           <BookingCloser />

@@ -707,6 +707,53 @@ img {
 .page-hero--text {
   min-height: auto;
   background: transparent;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(var(--u) * 2);
+}
+
+.page-hero__bar {
+  width: min(100%, var(--max));
+  margin-inline: auto;
+  padding-inline: calc(var(--u) * 3);
+}
+
+.page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(30, 58, 43, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--brand-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page-nav__btn:hover {
+  background: rgba(63, 143, 74, 0.12);
+  border-color: rgba(63, 143, 74, 0.28);
+}
+
+.site-footer__hours {
+  margin: calc(var(--u) * 1) 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .page-hero__media {

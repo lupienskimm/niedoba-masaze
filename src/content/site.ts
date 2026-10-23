@@ -20,9 +20,9 @@ export const site = {
   heroTitleShort: "POHLAZENÍ TĚLA I DUŠE",
   heroLead:
     "Masáž je úžasný prostředek, jak uvolnit a oživit unavený organismus, zmírnit stres a předcházet bolestem. Pro obnovu a harmonii Vašich fyzických i duševních sil nabízím široké spektrum masáží.",
-  openingHoursShort: "Otevřeno Po–Ne 8:00–18:00",
+  openingHoursShort: "Po–Pá 8:00–18:00 · víkend zavřeno",
   openingHoursFull:
-    "Po–Ne: 8:00 – 18:00. Mimo otevírací dobu po telefonické domluvě.",
+    "Po–Pá: 8:00 – 18:00. Víkend zavřeno. Mimo otevírací dobu po telefonické domluvě.",
   openingNote: "Pouze na objednání.",
   bookingTitle: "Domluvte si u mě masáž",
   aboutShort:

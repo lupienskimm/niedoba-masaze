@@ -3,6 +3,7 @@ import { Inter, Libre_Baskerville } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { MobileQuickBar } from "@/components/MobileQuickBar";
+import { NavStackTracker } from "@/components/NavStackTracker";
 import { site } from "@/content/site";
 import "./globals.css";
 
@@ -55,6 +56,7 @@ export default function RootLayout({
       className={`${inter.variable} ${classic.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <NavStackTracker />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
