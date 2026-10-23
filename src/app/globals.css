@@ -1547,9 +1547,14 @@ body {
     display: block;
   }
 
+  body.layout-v2 .home-v1,
   body.layout-v3 .home-v1,
   body.layout-v4 .home-v1 {
     display: none;
+  }
+
+  body.layout-v2 .home-mobile {
+    display: block !important;
   }
 
   body.layout-v3 .home-v3,

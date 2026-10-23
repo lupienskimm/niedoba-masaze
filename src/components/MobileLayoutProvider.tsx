@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-export const LAYOUT_VERSIONS = ["v1", "v3", "v4"] as const;
+export const LAYOUT_VERSIONS = ["v1", "v2", "v3", "v4"] as const;
 export type MobileLayoutVersion = (typeof LAYOUT_VERSIONS)[number];
 
 const STORAGE_KEY = "niedoba-site-layout";
@@ -20,6 +20,7 @@ export const LAYOUT_LABELS: Record<
   { short: string; title: string }
 > = {
   v1: { short: "V1", title: "Plný web" },
+  v2: { short: "V2", title: "Hero split (foto + text)" },
   v3: { short: "V3", title: "Hero + foto (PC)" },
   v4: { short: "V4", title: "Pořadí jako mobil (PC)" },
 };
@@ -54,7 +55,7 @@ export function MobileLayoutProvider({ children }: { children: ReactNode }) {
         localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_KEY);
       if (isValidVersion(stored)) {
         setVersionState(stored);
-      } else if (stored === "v2" || stored === "v5") {
+      } else if (stored === "v5") {
         setVersionState("v4");
       }
     } catch {
