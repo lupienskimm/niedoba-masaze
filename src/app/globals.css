@@ -665,22 +665,33 @@ img {
   min-height: calc(var(--u) * 5);
 }
 
-/* Mini map in footer */
+/* Mini map in footer — even thin border on all sides */
 .site-map--mini {
   max-width: 210px;
 }
 
 .site-map--mini .site-map__frame {
   border-radius: 10px;
-  padding: 1px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(30, 58, 43, 0.18);
   box-shadow: 0 4px 12px rgba(30, 58, 43, 0.08);
+  overflow: hidden;
 }
 
 .site-map--mini .site-map__viewport {
   aspect-ratio: 1.25 / 1;
   min-height: 0;
   height: 104px;
-  border-radius: 9px;
+  border-radius: 0;
+}
+
+.site-map--mini .site-map__viewport iframe {
+  /* crop Google Maps chrome so edges look even */
+  width: 118%;
+  height: 118%;
+  left: -9%;
+  top: -9%;
 }
 
 .site-map__mini-hit {
