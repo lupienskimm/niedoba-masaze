@@ -259,23 +259,19 @@ function DesktopHome() {
       </section>
 
       <section className="section section--alt">
-        <div className="wrap split split--about">
-          <div className="split__media split__media--circle">
+        <div className="wrap home-about-teaser">
+          <div className="home-about-teaser__photo">
             <Image
               src="/images/omne.jpg"
               alt="Robert Niedoba"
-              width={480}
-              height={480}
-              sizes="(max-width: 860px) 70vw, 320px"
+              width={200}
+              height={200}
+              sizes="160px"
             />
           </div>
-          <div>
-            <p className="section__eyebrow">O mně</p>
-            <h2 className="section__title">{site.aboutShort}</h2>
-            <Link href="/o-mne" className="btn btn--primary">
-              Více o mně
-            </Link>
-          </div>
+          <Link href="/o-mne" className="btn btn--primary">
+            Více o mně
+          </Link>
         </div>
       </section>
     </div>

@@ -1461,6 +1461,31 @@ body {
   border: 4px solid #fff;
 }
 
+.home-about-teaser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: calc(var(--u) * 3);
+}
+
+.home-about-teaser__photo {
+  width: 160px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #fff;
+  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.home-about-teaser__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
 .split--about > div:last-child {
   padding: calc(var(--u) * 4);
   border-radius: var(--radius);
