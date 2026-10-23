@@ -37,6 +37,7 @@ export function FooterHours() {
   useEffect(() => {
     const tick = () => {
       const { open, isWeekend } = pragueNow();
+      // Keep similar length to avoid footer CLS
       if (isWeekend) {
         setLabel("Víkend zavřeno · Po–Pá 8:00–18:00");
       } else if (open) {
@@ -50,5 +51,9 @@ export function FooterHours() {
     return () => window.clearInterval(id);
   }, []);
 
-  return <p className="site-footer__hours">{label}</p>;
+  return (
+    <p className="site-footer__hours" style={{ minHeight: "1.35em" }}>
+      {label}
+    </p>
+  );
 }

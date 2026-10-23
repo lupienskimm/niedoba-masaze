@@ -157,15 +157,17 @@ function DesktopHome() {
           </div>
           <div className="hero-v1__copy reveal reveal-delay">
             <p className="hero-v1__card">{site.aboutShort}</p>
-            <h1 className="hero-v1__title">{site.heroTitleShort}</h1>
-            <p className="hero-v1__lead">{site.heroLead}</p>
-            <div className="hero-v1__actions">
-              <Link href="/objednani" className="btn btn--primary">
-                Objednat
-              </Link>
-              <Link href="/sluzby" className="btn btn--ghost">
-                Služby
-              </Link>
+            <div className="hero-v1__stack">
+              <h1 className="hero-v1__title">{site.heroTitleShort}</h1>
+              <p className="hero-v1__lead">{site.heroLead}</p>
+              <div className="hero-v1__actions">
+                <Link href="/objednani" className="btn btn--primary">
+                  Objednat
+                </Link>
+                <Link href="/sluzby" className="btn btn--ghost">
+                  Služby
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -178,7 +180,7 @@ function DesktopHome() {
             <p className="section__lead">{site.servicesIntro}</p>
           </div>
           <div className="services-grid services-grid--equal">
-            {services.map((s) => (
+            {services.map((s, i) => (
               <Link key={s.id} href={`/sluzby#${s.id}`} className="service-card">
                 <div className="service-card__img">
                   <Image
@@ -187,6 +189,7 @@ function DesktopHome() {
                     width={400}
                     height={300}
                     sizes="(max-width: 960px) 45vw, 22vw"
+                    loading={i < 2 ? "eager" : "lazy"}
                   />
                 </div>
                 <h3 className="service-card__title">{s.title}</h3>

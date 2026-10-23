@@ -1,10 +1,25 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
+
+function subscribe(onChange: () => void) {
+  const mq = window.matchMedia("(max-width: 860px)");
+  mq.addEventListener("change", onChange);
+  return () => mq.removeEventListener("change", onChange);
+}
+
+function getSnapshot() {
+  return window.matchMedia("(max-width: 860px)").matches ? "mobile" : "desktop";
+}
+
+/** Desktop-first SSR snapshot avoids CLS on PC (mobile may swap once). */
+function getServerSnapshot() {
+  return "desktop" as const;
+}
 
 /**
- * Renders only mobile OR desktop home trees so hidden variants
- * do not download images / JS for the other viewport.
+ * Mounts only the active viewport tree after hydration.
+ * Server + first desktop paint use desktop to keep CLS ~0 on PC.
  */
 export function HomeShell({
   mobile,
@@ -13,18 +28,9 @@ export function HomeShell({
   mobile: ReactNode;
   desktop: ReactNode;
 }) {
-  const [mode, setMode] = useState<"mobile" | "desktop" | null>(null);
+  const mode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 860px)");
-    const sync = () => setMode(mq.matches ? "mobile" : "desktop");
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  // SSR + first paint: prefer mobile markup (smaller) until measured
-  if (mode === null || mode === "mobile") {
+  if (mode === "mobile") {
     return <div className="home-mobile">{mobile}</div>;
   }
 

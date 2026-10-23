@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { site } from "@/content/site";
 
 type SiteMapProps = {
@@ -6,18 +9,43 @@ type SiteMapProps = {
 
 export function SiteMap({ size = "large" }: SiteMapProps) {
   const isMini = size === "mini";
+  const ref = useRef<HTMLDivElement>(null);
+  const [showMap, setShowMap] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShowMap(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    <div className={`site-map${isMini ? " site-map--mini" : " site-map--large"}`}>
+    <div
+      ref={ref}
+      className={`site-map${isMini ? " site-map--mini" : " site-map--large"}`}
+    >
       <div className="site-map__frame">
         <div className="site-map__viewport">
-          <iframe
-            title={`Mapa – ${site.address}`}
-            src={site.mapEmbedUrl}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            allowFullScreen
-          />
+          {showMap ? (
+            <iframe
+              title={`Mapa – ${site.address}`}
+              src={site.mapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+            />
+          ) : (
+            <div className="site-map__placeholder" aria-hidden />
+          )}
         </div>
 
         {!isMini && (
