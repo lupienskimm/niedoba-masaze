@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
 import { ServiceCard } from "@/components/ServiceCard";
+import { brands } from "@/content/services";
 import { pricing, services, site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -46,6 +48,29 @@ export default function ServicesPage() {
             <Link href="/objednani" className="btn btn--primary">
               Domluvte si u mě masáž
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="section__head section__head--center">
+            <h2 className="section__title section__title--gradient">
+              Používáme jen ty nejkvalitnější oleje a přípravky
+            </h2>
+          </div>
+          <div className="brand-logos">
+            {brands.map((b) => (
+              <div key={b.name} className="brand-logos__item">
+                <Image
+                  src={b.src}
+                  alt={b.name}
+                  width={200}
+                  height={100}
+                  className="brand-logos__img"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
