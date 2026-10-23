@@ -108,6 +108,8 @@ function PhotoIntro({
 }) {
   return (
     <section className="v2-hero">
+      <p className="v2-hero__brand">{site.name}</p>
+      <h1 className="v2-hero__title">{title}</h1>
       <div className="v2-hero__photo">
         <Image
           src="/images/omne.jpg"
@@ -115,11 +117,9 @@ function PhotoIntro({
           width={220}
           height={220}
           sizes="168px"
-          fetchPriority="low"
+          loading="lazy"
         />
       </div>
-      <p className="v2-hero__brand">{site.name}</p>
-      <h1 className="v2-hero__title">{title}</h1>
       <p className="v2-hero__meta">{site.openingHoursShort}</p>
       <p className="v2-hero__note">{site.openingNote}</p>
       <div
