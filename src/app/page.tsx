@@ -104,32 +104,33 @@ function PhotoIntro({ showHeroCtas = false }: { showHeroCtas?: boolean }) {
           sizes="100vw"
         />
       </div>
-      <div className="v2-hero__shade" />
-      <div className="v2-hero__split">
-        <div className="v2-hero__person">
-          <div className="v2-hero__photo">
-            <Image
-              src="/images/omne.jpg"
-              alt="Robert Niedoba"
-              width={220}
-              height={220}
-              priority
-            />
+      <div className="v2-hero__glass">
+        <div className="v2-hero__split">
+          <div className="v2-hero__person">
+            <div className="v2-hero__photo">
+              <Image
+                src="/images/omne.jpg"
+                alt="Robert Niedoba"
+                width={220}
+                height={220}
+                priority
+              />
+            </div>
+            <p className="v2-hero__caption">{site.aboutShort}</p>
           </div>
-          <p className="v2-hero__caption">{site.aboutShort}</p>
-        </div>
-        <div className="v2-hero__copy">
-          <p className="v2-hero__lead">{site.heroLead}</p>
-          <div
-            className="v2-hero__actions"
-            {...(showHeroCtas ? { "data-hero-ctas": true } : {})}
-          >
-            <Link href="/objednani" className="btn btn--primary v2-hero__cta">
-              Objednat
-            </Link>
-            <Link href="/sluzby" className="btn btn--ghost v2-hero__cta">
-              Služby
-            </Link>
+          <div className="v2-hero__copy">
+            <p className="v2-hero__lead">{site.heroLead}</p>
+            <div
+              className="v2-hero__actions"
+              {...(showHeroCtas ? { "data-hero-ctas": true } : {})}
+            >
+              <Link href="/objednani" className="btn btn--primary v2-hero__cta">
+                Objednat
+              </Link>
+              <Link href="/sluzby" className="btn btn--ghost v2-hero__cta">
+                Služby
+              </Link>
+            </div>
           </div>
         </div>
       </div>
