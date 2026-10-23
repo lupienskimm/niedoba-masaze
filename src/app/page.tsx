@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HomeDesktop } from "@/components/HomeDesktop";
+import { HomeShell } from "@/components/HomeShell";
 import { pricing, services, site } from "@/content/site";
 
 const featuredIds = [
@@ -22,7 +24,13 @@ function FeaturedServices() {
           {list.map((s) => (
             <Link key={s.id} href={`/sluzby#${s.id}`} className="v2-service">
               <span className="v2-service__img">
-                <Image src={s.image} alt="" width={120} height={90} />
+                <Image
+                  src={s.image}
+                  alt=""
+                  width={120}
+                  height={90}
+                  sizes="120px"
+                />
               </span>
               <span className="v2-service__body">
                 <span className="v2-service__title">{s.title}</span>
@@ -108,6 +116,7 @@ function PhotoIntro({
           width={220}
           height={220}
           priority
+          sizes="168px"
         />
       </div>
       <p className="v2-hero__brand">{site.name}</p>
@@ -132,230 +141,256 @@ function PhotoIntro({
   );
 }
 
-export default function HomePage() {
+function DesktopV1() {
   return (
-    <>
-      {/* Mobile only — always V2-style */}
-      <div className="home-mobile">
-        <PhotoIntro title={site.aboutShort} showHeroCtas />
-        <QuickPricing />
-        <FeaturedServices />
-        <BookingCloser />
-      </div>
-
-      {/* Desktop V1 — plný web */}
-      <div className="home-v1">
-        <section className="hero-v1">
-          <div className="hero-v1__grid">
-            <div className="hero-v1__copy reveal">
-              <h1 className="hero-v1__title">{site.heroTitleShort}</h1>
-              <p className="hero-v1__lead">{site.heroLead}</p>
-            </div>
-            <aside className="hero-v1__aside reveal reveal-delay">
-              <div className="hero-v1__photo">
-                <Image
-                  src="/images/omne.jpg"
-                  alt="Robert Niedoba"
-                  width={280}
-                  height={280}
-                  priority
-                />
-              </div>
-              <p className="hero-v1__card">{site.aboutShort}</p>
-            </aside>
-          </div>
-          <div className="hero-v1__actions reveal reveal-delay-2">
-            <Link href="/objednani" className="btn btn--primary">
-              Objednat
-            </Link>
-            <Link href="/sluzby" className="btn btn--ghost">
-              Služby
-            </Link>
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="wrap">
-            <div className="band">
-              <p>
-                <strong>{site.openingHoursShort}</strong>
-              </p>
-              <p className="muted">{site.bookingHint}</p>
-              <Link href="/objednani" className="btn btn--primary">
-                Domluvte si u mě masáž
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="section section--alt">
-          <div className="wrap">
-            <div className="section__head section__head--center">
-              <h2 className="section__title section__title--gradient">SLUŽBY</h2>
-              <p className="section__lead">{site.servicesIntro}</p>
-            </div>
-            <div className="services-grid services-grid--equal">
-              {services.map((s) => (
-                <Link
-                  key={s.id}
-                  href={`/sluzby#${s.id}`}
-                  className="service-card"
-                >
-                  <div className="service-card__img">
-                    <Image src={s.image} alt="" width={480} height={360} />
-                  </div>
-                  <h3 className="service-card__title">{s.title}</h3>
-                  <p className="service-card__text">{s.short}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="wrap split split--about">
-            <div className="split__media split__media--circle">
-              <Image
-                src="/images/omne.jpg"
-                alt="Robert Niedoba"
-                width={480}
-                height={480}
-              />
-            </div>
-            <div>
-              <p className="section__eyebrow">O mně</p>
-              <h2 className="section__title">{site.aboutShort}</h2>
-              <Link href="/o-mne" className="btn btn--primary">
-                Více o mně
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="section section--alt">
-          <div className="wrap">
-            <div className="content-center">
-              <div className="section__head section__head--center">
-                <h2 className="section__title section__title--gradient">CENÍK</h2>
-                <p className="section__lead section__lead--center">
-                  {site.servicesIntro}
-                </p>
-              </div>
-              <div className="price-cards">
-                {pricing.map((row) => (
-                  <div key={row.name} className="price-card">
-                    <p className="price-card__name">{row.name}</p>
-                    <p className="price-card__price">{row.price}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="muted content-center__note">{site.specialOffer}</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="wrap">
-            <blockquote className="quote">
-              „{site.testimonial.quote}“
-              <cite>– {site.testimonial.author}</cite>
-            </blockquote>
-            <div className="band" style={{ marginTop: 48 }}>
-              <div>
-                <p className="section__eyebrow">Kontakt</p>
-                <p>
-                  <strong>{site.address}</strong>
-                </p>
-                <p>
-                  <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
-                  {" · "}
-                  <a href={`mailto:${site.email}`}>{site.email}</a>
-                </p>
-              </div>
-              <Link href="/kontakt" className="btn btn--ghost">
-                Kontakt
-              </Link>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* Desktop V3 — kombinace V1 hero + V4 foto */}
-      <div className="home-v3">
-        <section className="hero hero--v3">
-          <div className="hero__media">
-            <Image
-              src="/images/hero-massage.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-            />
-          </div>
-          <div className="hero__shade" />
-          <div className="hero__content hero__content--center">
-            <p className="hero__brand">{site.name}</p>
-            <h1 className="hero__title hero__title--xl">{site.heroTitle}</h1>
-            <p className="hero__lead">{site.aboutShort}</p>
-            <div className="hero__actions">
-              <Link href="/objednani" className="btn btn--primary">
-                Objednat masáž
-              </Link>
-              <a
-                href={`tel:${site.phoneRaw}`}
-                className="btn btn--ghost"
-                style={{ color: "#fff", borderColor: "rgba(255,255,255,0.55)" }}
-              >
-                Zavolat
-              </a>
-            </div>
-            <p className="hero__hours">{site.openingHoursShort}</p>
-          </div>
-        </section>
-
-        <section className="v4-intro">
-          <div className="v4-intro__photo">
+    <div className="home-v1">
+      <section className="hero-v1">
+        <div className="hero-v1__grid">
+          <div className="hero-v1__photo reveal">
             <Image
               src="/images/omne.jpg"
               alt="Robert Niedoba"
-              width={360}
-              height={360}
+              width={640}
+              height={800}
+              priority
+              sizes="(max-width: 1100px) 42vw, 420px"
             />
           </div>
-          <div className="v4-intro__copy">
-            <p className="v2-hero__brand">O mně</p>
-            <h2 className="v4-intro__title">{site.aboutShort}</h2>
-            <p className="v4-intro__lead">{site.heroLead}</p>
+          <div className="hero-v1__copy reveal reveal-delay">
+            <p className="hero-v1__card">{site.aboutShort}</p>
+            <h1 className="hero-v1__title">{site.heroTitleShort}</h1>
+            <p className="hero-v1__lead">{site.heroLead}</p>
+            <div className="hero-v1__actions">
+              <Link href="/objednani" className="btn btn--primary">
+                Objednat
+              </Link>
+              <Link href="/sluzby" className="btn btn--ghost">
+                Služby
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="band">
+            <p>
+              <strong>{site.openingHoursShort}</strong>
+            </p>
+            <p className="muted">{site.bookingHint}</p>
+            <Link href="/objednani" className="btn btn--primary">
+              Domluvte si u mě masáž
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--alt">
+        <div className="wrap">
+          <div className="section__head section__head--center">
+            <h2 className="section__title section__title--gradient">SLUŽBY</h2>
+            <p className="section__lead">{site.servicesIntro}</p>
+          </div>
+          <div className="services-grid services-grid--equal">
+            {services.map((s) => (
+              <Link key={s.id} href={`/sluzby#${s.id}`} className="service-card">
+                <div className="service-card__img">
+                  <Image
+                    src={s.image}
+                    alt=""
+                    width={400}
+                    height={300}
+                    sizes="(max-width: 960px) 45vw, 22vw"
+                  />
+                </div>
+                <h3 className="service-card__title">{s.title}</h3>
+                <p className="service-card__text">{s.short}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--alt">
+        <div className="wrap">
+          <div className="content-center">
+            <div className="section__head section__head--center">
+              <h2 className="section__title section__title--gradient">CENÍK</h2>
+              <p className="section__lead section__lead--center">
+                {site.servicesIntro}
+              </p>
+            </div>
+            <div className="price-cards">
+              {pricing.map((row) => (
+                <div key={row.name} className="price-card">
+                  <p className="price-card__name">{row.name}</p>
+                  <p className="price-card__price">{row.price}</p>
+                </div>
+              ))}
+            </div>
+            <p className="muted content-center__note">{site.specialOffer}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <blockquote className="quote">
+            „{site.testimonial.quote}“
+            <cite>– {site.testimonial.author}</cite>
+          </blockquote>
+          <div className="band" style={{ marginTop: 48 }}>
+            <div>
+              <p className="section__eyebrow">Kontakt</p>
+              <p>
+                <strong>{site.address}</strong>
+              </p>
+              <p>
+                <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
+                {" · "}
+                <a href={`mailto:${site.email}`}>{site.email}</a>
+              </p>
+            </div>
+            <Link href="/kontakt" className="btn btn--ghost">
+              Kontakt
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="section section--alt">
+        <div className="wrap split split--about">
+          <div className="split__media split__media--circle">
+            <Image
+              src="/images/omne.jpg"
+              alt="Robert Niedoba"
+              width={480}
+              height={480}
+              sizes="(max-width: 860px) 70vw, 320px"
+            />
+          </div>
+          <div>
+            <p className="section__eyebrow">O mně</p>
+            <h2 className="section__title">{site.aboutShort}</h2>
             <Link href="/o-mne" className="btn btn--primary">
               Více o mně
             </Link>
           </div>
-        </section>
+        </div>
+      </section>
+    </div>
+  );
+}
 
-        <QuickPricing cta="Domluvte si u mě masáž" />
-        <FeaturedServices />
-        <BookingCloser />
-      </div>
+function DesktopV2() {
+  return (
+    <div className="home-v2">
+      <PhotoIntro title={site.aboutShort} />
+      <QuickPricing />
+      <FeaturedServices />
+      <BookingCloser />
+    </div>
+  );
+}
 
-      {/* Desktop V4 — stejný design jako V3, pořadí jako mobil */}
-      <div className="home-v4">
-        <PhotoIntro title={site.heroTitle} />
-        <section className="v4-atmosphere">
-          <div className="v4-atmosphere__media">
-            <Image
-              src="/images/hero-massage.jpg"
-              alt=""
-              fill
-              sizes="100vw"
-            />
-            <div className="v4-atmosphere__shade" />
-            <p className="v4-atmosphere__text">{site.aboutShort}</p>
+function DesktopV3() {
+  return (
+    <div className="home-v3">
+      <section className="hero hero--v3">
+        <div className="hero__media">
+          <Image
+            src="/images/hero-massage.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+          />
+        </div>
+        <div className="hero__shade" />
+        <div className="hero__content hero__content--center">
+          <p className="hero__brand">{site.name}</p>
+          <h1 className="hero__title hero__title--xl">{site.heroTitle}</h1>
+          <p className="hero__lead">{site.aboutShort}</p>
+          <div className="hero__actions">
+            <Link href="/objednani" className="btn btn--primary">
+              Objednat masáž
+            </Link>
+            <a
+              href={`tel:${site.phoneRaw}`}
+              className="btn btn--ghost"
+              style={{ color: "#fff", borderColor: "rgba(255,255,255,0.55)" }}
+            >
+              Zavolat
+            </a>
           </div>
-        </section>
-        <QuickPricing />
-        <FeaturedServices />
-        <BookingCloser />
-      </div>
-    </>
+          <p className="hero__hours">{site.openingHoursShort}</p>
+        </div>
+      </section>
+
+      <section className="v4-intro">
+        <div className="v4-intro__photo">
+          <Image
+            src="/images/omne.jpg"
+            alt="Robert Niedoba"
+            width={360}
+            height={360}
+            sizes="280px"
+          />
+        </div>
+        <div className="v4-intro__copy">
+          <p className="v2-hero__brand">O mně</p>
+          <h2 className="v4-intro__title">{site.aboutShort}</h2>
+          <p className="v4-intro__lead">{site.heroLead}</p>
+          <Link href="/o-mne" className="btn btn--primary">
+            Více o mně
+          </Link>
+        </div>
+      </section>
+
+      <QuickPricing cta="Domluvte si u mě masáž" />
+      <FeaturedServices />
+      <BookingCloser />
+    </div>
+  );
+}
+
+function DesktopV4() {
+  return (
+    <div className="home-v4">
+      <PhotoIntro title={site.heroTitle} />
+      <section className="v4-atmosphere">
+        <div className="v4-atmosphere__media">
+          <Image src="/images/hero-massage.jpg" alt="" fill sizes="100vw" />
+          <div className="v4-atmosphere__shade" />
+          <p className="v4-atmosphere__text">{site.aboutShort}</p>
+        </div>
+      </section>
+      <QuickPricing />
+      <FeaturedServices />
+      <BookingCloser />
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <HomeShell
+      mobile={
+        <>
+          <PhotoIntro title={site.aboutShort} showHeroCtas />
+          <QuickPricing />
+          <FeaturedServices />
+          <BookingCloser />
+        </>
+      }
+      desktop={
+        <HomeDesktop
+          v1={<DesktopV1 />}
+          v2={<DesktopV2 />}
+          v3={<DesktopV3 />}
+          v4={<DesktopV4 />}
+        />
+      }
+    />
   );
 }

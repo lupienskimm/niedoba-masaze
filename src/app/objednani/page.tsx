@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { BookingWizard } from "@/components/booking/BookingWizard";
 import { PageHero } from "@/components/PageHero";
 import { site } from "@/content/site";
 
@@ -12,34 +14,29 @@ export default function BookingPage() {
       <PageHero title="OBJEDNÁNÍ" />
 
       <section className="section">
-        <div className="wrap wrap--narrow">
-          <div className="content-center">
+        <div className="wrap">
+          <div className="booking-intro">
             <p className="section__lead section__lead--center">
-              {site.bookingHint}
+              Vyberte volný den v kalendáři, čas a vyplňte formulář. Potvrzení
+              přijde vám i panu Niedobovi e-mailem.
             </p>
-            <p className="muted">{site.openingHoursFull}</p>
+            <p className="muted content-center">{site.openingHoursFull}</p>
+          </div>
 
-            <div className="contact-stack contact-stack--center">
-              <a href={`tel:${site.phoneRaw}`} className="btn btn--primary">
-                Zavolat {site.phoneDisplay}
-              </a>
-              <a href={`sms:${site.phoneRaw}`} className="btn btn--ghost">
-                Poslat SMS
-              </a>
-              <a
-                href={`mailto:${site.email}?subject=Objednávka%20masáže`}
-                className="btn btn--ghost"
-              >
-                Napsat e-mail
-              </a>
-            </div>
+          <Suspense fallback={<p className="muted content-center">Načítám kalendář…</p>}>
+            <BookingWizard />
+          </Suspense>
 
-            <div className="content-center__block">
-              <p>
-                <strong>Provozovna:</strong> {site.address}
-              </p>
-              <p className="muted">{site.openingNote}</p>
-            </div>
+          <div className="booking-alt">
+            <p className="muted">
+              Preferujete telefon?{" "}
+              <a href={`tel:${site.phoneRaw}`}>{site.phoneDisplay}</a>
+              {" · "}
+              <a href={`mailto:${site.email}`}>{site.email}</a>
+            </p>
+            <p className="muted">
+              <strong>Provozovna:</strong> {site.address} · {site.openingNote}
+            </p>
           </div>
         </div>
       </section>

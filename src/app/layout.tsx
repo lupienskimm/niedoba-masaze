@@ -11,13 +11,16 @@ import "./globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "600", "700"],
+  display: "swap",
 });
 
 const classic = Libre_Baskerville({
   variable: "--font-classic",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "700"],
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
