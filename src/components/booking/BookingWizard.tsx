@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   buildMonthGrid,
@@ -34,7 +35,6 @@ export function BookingWizard() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
-  const [openServiceId, setOpenServiceId] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
   useEffect(() => {
@@ -278,7 +278,6 @@ export function BookingWizard() {
             <fieldset className="booking-services">
               <legend>Výběr služby</legend>
               {services.map((s) => {
-                const open = openServiceId === s.id;
                 const selected = service === s.title;
                 return (
                   <div
@@ -294,26 +293,16 @@ export function BookingWizard() {
                           checked={selected}
                           onChange={() => setService(s.title)}
                         />
-                        <span>{s.title}</span>
+                        <Link
+                          href={`/sluzby/${s.id}`}
+                          className="booking-service__name"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {s.title}
+                        </Link>
                       </label>
-                      <button
-                        type="button"
-                        className="booking-service__toggle"
-                        aria-expanded={open}
-                        onClick={() =>
-                          setOpenServiceId(open ? null : s.id)
-                        }
-                      >
-                        {open ? "Skrýt" : "Více"}
-                      </button>
                     </div>
-                    {open && (
-                      <div className="booking-service__detail">
-                        {s.full.split("\n\n").map((p) => (
-                          <p key={p.slice(0, 40)}>{p}</p>
-                        ))}
-                      </div>
-                    )}
+                    <p className="booking-service__short">{s.short}</p>
                   </div>
                 );
               })}

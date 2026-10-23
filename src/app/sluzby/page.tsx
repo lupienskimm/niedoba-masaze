@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
-import { ServiceExpandable } from "@/components/ServiceExpandable";
+import { ServiceCard } from "@/components/ServiceCard";
 import { pricing, services, site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default function ServicesPage() {
 
           <div className="services-grid services-grid--equal">
             {services.map((s) => (
-              <ServiceExpandable key={s.id} service={s} />
+              <ServiceCard key={s.id} service={s} />
             ))}
           </div>
         </div>

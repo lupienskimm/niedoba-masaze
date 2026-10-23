@@ -1,7 +1,7 @@
 import { get, put } from "@vercel/blob";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import { seedDemoSlots } from "@/lib/booking/seed";
+import { seedDemoBookings, seedDemoSlots } from "@/lib/booking/seed";
 import {
   emptyStore,
   type Booking,
@@ -56,10 +56,16 @@ export async function loadStore(): Promise<BookingStore> {
     store = await readBlob();
   }
   if (!store) store = await readLocal();
+  let changed = false;
   if (store.slots.length === 0) {
     store = seedDemoSlots(store);
-    await saveStore(store);
+    changed = true;
   }
+  if (store.bookings.length === 0) {
+    store = seedDemoBookings(store);
+    changed = true;
+  }
+  if (changed) await saveStore(store);
   return store;
 }
 

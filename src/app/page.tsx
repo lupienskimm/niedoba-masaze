@@ -21,7 +21,7 @@ function FeaturedServices() {
         <p className="v2-section__lead">{site.servicesIntro}</p>
         <div className="v2-services">
           {list.map((s) => (
-            <Link key={s.id} href={`/sluzby#${s.id}`} className="v2-service">
+            <Link key={s.id} href={`/sluzby/${s.id}`} className="v2-service">
               <span className="v2-service__img">
                 <Image
                   src={s.image}
@@ -181,7 +181,7 @@ function DesktopHome() {
           </div>
           <div className="services-grid services-grid--equal">
             {services.map((s, i) => (
-              <Link key={s.id} href={`/sluzby#${s.id}`} className="service-card">
+              <Link key={s.id} href={`/sluzby/${s.id}`} className="service-card">
                 <div className="service-card__img">
                   <Image
                     src={s.image}

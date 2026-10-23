@@ -11,10 +11,7 @@ import {
 } from "@/lib/booking/calendar";
 import type { BookingStore, TimeSlot } from "@/lib/booking/types";
 
-export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) {
-  const [authed, setAuthed] = useState(initiallyAuthed);
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState<string | null>(null);
+export function SpravaClient() {
   const [store, setStore] = useState<BookingStore | null>(null);
   const [year, setYear] = useState(2026);
   const [monthIndex, setMonthIndex] = useState(0);
@@ -24,6 +21,7 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const now = new Date();
@@ -35,42 +33,23 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
   }, []);
 
   const load = useCallback(async () => {
-    const res = await fetch("/api/sprava/slots");
-    if (res.status === 401) {
-      setAuthed(false);
-      setStore(null);
-      return;
+    try {
+      const res = await fetch("/api/sprava/slots");
+      if (!res.ok) {
+        setLoadError("Nepodařilo se načíst termíny.");
+        return;
+      }
+      const data = (await res.json()) as BookingStore;
+      setStore(data);
+      setLoadError(null);
+    } catch {
+      setLoadError("Síťová chyba při načítání správy.");
     }
-    const data = (await res.json()) as BookingStore;
-    setStore(data);
-    setAuthed(true);
   }, []);
 
   useEffect(() => {
-    if (authed) void load();
-  }, [authed, load]);
-
-  async function login(e: React.FormEvent) {
-    e.preventDefault();
-    setLoginError(null);
-    const res = await fetch("/api/sprava/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    if (!res.ok) {
-      setLoginError("Nesprávné heslo.");
-      return;
-    }
-    setAuthed(true);
-    setPassword("");
-  }
-
-  async function logout() {
-    await fetch("/api/sprava/logout", { method: "POST" });
-    setAuthed(false);
-    setStore(null);
-  }
+    void load();
+  }, [load]);
 
   async function runAction(body: Record<string, unknown>) {
     setBusy(true);
@@ -94,29 +73,6 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
     }
   }
 
-  if (!authed) {
-    return (
-      <form className="sprava-login" onSubmit={login}>
-        <h1 className="sprava-login__title">Správa termínů</h1>
-        <p className="muted">Přihlášení pro pana Niedobu</p>
-        <label className="booking-field">
-          <span>Heslo</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            required
-          />
-        </label>
-        {loginError && <p className="booking-error">{loginError}</p>}
-        <button type="submit" className="btn btn--primary">
-          Vstoupit
-        </button>
-      </form>
-    );
-  }
-
   const cells = buildMonthGrid(year, monthIndex);
   const slotsByDate = useMemo(() => {
     const map = new Map<string, TimeSlot[]>();
@@ -131,10 +87,16 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
   const daySlots = (slotsByDate.get(selectedDate) || []).sort((a, b) =>
     a.time.localeCompare(b.time),
   );
-  const booked = (store?.bookings || []).filter((b) => b.date >= todayKey);
+  const booked = (store?.bookings || [])
+    .filter((b) => b.date >= todayKey)
+    .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
   if (!calReady) {
     return <p className="muted">Načítám správu…</p>;
+  }
+
+  if (loadError && !store) {
+    return <p className="booking-error">{loadError}</p>;
   }
 
   return (
@@ -142,11 +104,11 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
       <div className="sprava__top">
         <div>
           <h1 className="sprava__title">Správa termínů</h1>
-          <p className="muted">Přidávejte volné časy, odebírejte je nebo vracjejte po zrušení.</p>
+          <p className="muted">
+            Přidávejte volné časy, odebírejte je nebo vracjejte po zrušení.
+            Heslo zatím není — doplníme později.
+          </p>
         </div>
-        <button type="button" className="btn btn--ghost" onClick={logout}>
-          Odhlásit
-        </button>
       </div>
 
       <div className="booking-wizard sprava__grid">
@@ -255,16 +217,35 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
               const booking = store?.bookings.find((b) => b.id === slot.bookingId);
               return (
                 <li key={slot.id} className="sprava-list__item">
-                  <div>
-                    <strong>{slot.time}</strong>{" "}
-                    <span className={`sprava-badge sprava-badge--${slot.status}`}>
-                      {slot.status === "available" ? "volný" : "obsazený"}
-                    </span>
-                    {booking && (
-                      <p className="muted">
-                        {booking.name} · {booking.phone} · {booking.email}
-                      </p>
-                    )}
+                  <div className="sprava-person">
+                    <p className="sprava-person__time">
+                      <strong>{slot.time}</strong>{" "}
+                      <span className={`sprava-badge sprava-badge--${slot.status}`}>
+                        {slot.status === "available" ? "volný" : "obsazený"}
+                      </span>
+                    </p>
+                    {booking ? (
+                      <dl className="sprava-person__meta">
+                        <div>
+                          <dt>Jméno</dt>
+                          <dd>{booking.name}</dd>
+                        </div>
+                        <div>
+                          <dt>Telefon</dt>
+                          <dd>
+                            <a href={`tel:${booking.phone.replace(/\s/g, "")}`}>
+                              {booking.phone}
+                            </a>
+                          </dd>
+                        </div>
+                        {booking.service ? (
+                          <div>
+                            <dt>Služba</dt>
+                            <dd>{booking.service}</dd>
+                          </div>
+                        ) : null}
+                      </dl>
+                    ) : null}
                   </div>
                   <div className="sprava-list__btns">
                     {slot.status === "available" && (
@@ -307,14 +288,38 @@ export function SpravaClient({ initiallyAuthed }: { initiallyAuthed: boolean }) 
           {booked.length === 0 && <li className="muted">Zatím žádné</li>}
           {booked.map((b) => (
             <li key={b.id} className="sprava-list__item">
-              <div>
-                <strong>
-                  {b.date} {b.time}
-                </strong>
-                <p className="muted">
-                  {b.name} · {b.phone} · {b.email}
-                  {b.service ? ` · ${b.service}` : ""}
+              <div className="sprava-person">
+                <p className="sprava-person__time">
+                  <strong>
+                    {b.date} · {b.time}
+                  </strong>
                 </p>
+                <dl className="sprava-person__meta">
+                  <div>
+                    <dt>Jméno</dt>
+                    <dd>{b.name}</dd>
+                  </div>
+                  <div>
+                    <dt>Telefon</dt>
+                    <dd>
+                      <a href={`tel:${b.phone.replace(/\s/g, "")}`}>{b.phone}</a>
+                    </dd>
+                  </div>
+                  {b.service ? (
+                    <div>
+                      <dt>Služba</dt>
+                      <dd>{b.service}</dd>
+                    </div>
+                  ) : null}
+                  {b.email ? (
+                    <div>
+                      <dt>E-mail</dt>
+                      <dd>
+                        <a href={`mailto:${b.email}`}>{b.email}</a>
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
               </div>
               <button
                 type="button"

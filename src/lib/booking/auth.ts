@@ -4,6 +4,11 @@ import { createHmac, timingSafeEqual } from "crypto";
 const COOKIE = "niedoba_sprava";
 const MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
+/** Temporary: správa is open without password. Re-enable when SPRAVA_REQUIRE_PASSWORD=1. */
+export function isSpravaPasswordRequired() {
+  return process.env.SPRAVA_REQUIRE_PASSWORD === "1";
+}
+
 function secret() {
   return (
     process.env.SPRAVA_PASSWORD ||
@@ -27,6 +32,7 @@ export function checkPassword(password: string) {
 }
 
 export async function isSpravaAuthed() {
+  if (!isSpravaPasswordRequired()) return true;
   const jar = await cookies();
   const value = jar.get(COOKIE)?.value;
   if (!value) return false;
