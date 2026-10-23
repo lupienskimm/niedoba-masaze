@@ -45,7 +45,10 @@ export default function ServicesPage() {
                 </div>
               ))}
             </div>
-            <Link href="/objednani" className="btn btn--primary">
+            <Link
+              href="/objednani"
+              className="btn btn--primary content-center__cta"
+            >
               Domluvte si u mě masáž
             </Link>
           </div>

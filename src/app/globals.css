@@ -119,9 +119,11 @@ img {
   text-align: left;
 }
 
-.content-center > .btn {
+.content-center > .btn,
+.content-center > .content-center__cta {
   width: auto;
   align-self: center;
+  margin-top: calc(var(--u) * 4.5);
 }
 
 .content-center__note {
@@ -1328,6 +1330,23 @@ body {
   justify-content: center;
   gap: calc(var(--u) * 2);
   margin-top: calc(var(--u) * 0.5);
+}
+
+.hero-v1__phone {
+  display: inline-flex;
+  justify-content: center;
+  margin-top: calc(var(--u) * 0.5);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--brand-deep);
+  text-decoration: none;
+}
+
+.hero-v1__phone:hover {
+  color: var(--brand-mid);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .hero__brand {

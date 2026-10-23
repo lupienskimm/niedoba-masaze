@@ -174,6 +174,12 @@ function DesktopHome() {
                   Služby
                 </Link>
               </div>
+              <a
+                href={`tel:${site.phoneRaw}`}
+                className="hero-v1__phone"
+              >
+                {site.phoneDisplay}
+              </a>
             </div>
           </div>
         </div>
