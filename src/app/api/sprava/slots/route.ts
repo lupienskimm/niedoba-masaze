@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { isSpravaAuthed } from "@/lib/booking/auth";
 import {
   loadStore,
+  manualPhoneBooking,
   removeAvailableSlot,
+  removeAvailableTimes,
   restoreSlot,
   updateStore,
   upsertAvailableSlots,
@@ -22,10 +24,16 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json()) as {
-    action?: "add" | "remove" | "restore";
+    action?: "add" | "remove" | "removeTimes" | "restore" | "phoneBook";
     date?: string;
     times?: string[];
+    time?: string;
     slotId?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    service?: string;
+    note?: string;
   };
 
   try {
@@ -41,8 +49,45 @@ export async function POST(request: Request) {
       return NextResponse.json(store);
     }
 
+    if (body.action === "removeTimes" && body.date && body.times?.length) {
+      const store = await updateStore((s) =>
+        removeAvailableTimes(s, body.date!, body.times!),
+      );
+      return NextResponse.json(store);
+    }
+
     if (body.action === "restore" && body.slotId) {
       const store = await updateStore((s) => restoreSlot(s, body.slotId!));
+      return NextResponse.json(store);
+    }
+
+    if (
+      body.action === "phoneBook" &&
+      body.date &&
+      body.time &&
+      body.name &&
+      body.phone
+    ) {
+      let error: string | null = null;
+      const store = await updateStore((s) => {
+        const result = manualPhoneBooking(s, {
+          date: body.date!,
+          time: body.time!,
+          name: body.name!,
+          phone: body.phone!,
+          email: body.email,
+          service: body.service,
+          note: body.note,
+        });
+        if ("error" in result) {
+          error = result.error;
+          return s;
+        }
+        return result.store;
+      });
+      if (error) {
+        return NextResponse.json({ error }, { status: 409 });
+      }
       return NextResponse.json(store);
     }
 

@@ -152,7 +152,7 @@ export function createBooking(
   input: {
     slotId: string;
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     note?: string;
     service?: string;
@@ -168,7 +168,7 @@ export function createBooking(
     date: slot.date,
     time: slot.time,
     name: input.name.trim(),
-    email: input.email.trim(),
+    email: (input.email || "").trim(),
     phone: input.phone.trim(),
     note: input.note?.trim() || undefined,
     service: input.service?.trim() || undefined,
@@ -180,6 +180,64 @@ export function createBooking(
   slot.bookingId = booking.id;
   store.bookings.unshift(booking);
   return { store, booking };
+}
+
+/** Phone / admin booking: create the slot if missing, then mark it booked. */
+export function manualPhoneBooking(
+  store: BookingStore,
+  input: {
+    date: string;
+    time: string;
+    name: string;
+    phone: string;
+    email?: string;
+    note?: string;
+    service?: string;
+  },
+): { store: BookingStore; booking: Booking } | { error: string } {
+  const name = input.name.trim();
+  const phone = input.phone.trim();
+  if (!name || !phone) return { error: "Vyplňte jméno a telefon." };
+
+  let slot = store.slots.find(
+    (s) => s.date === input.date && s.time === input.time,
+  );
+
+  if (slot?.status === "booked") {
+    return { error: "Tento čas už je obsazený." };
+  }
+
+  if (!slot) {
+    slot = {
+      id: makeId("slot"),
+      date: input.date,
+      time: input.time,
+      status: "available",
+    };
+    store.slots.push(slot);
+  }
+
+  return createBooking(store, {
+    slotId: slot.id,
+    name,
+    phone,
+    email: input.email,
+    note: input.note || "Rezervace telefonicky",
+    service: input.service,
+  });
+}
+
+export function removeAvailableTimes(
+  store: BookingStore,
+  date: string,
+  times: string[],
+) {
+  const remove = new Set(times);
+  store.slots = store.slots.filter(
+    (s) =>
+      !(s.date === date && remove.has(s.time) && s.status === "available"),
+  );
+  return store;
 }
 
 export function cancelBookingByToken(store: BookingStore, token: string) {

@@ -10,6 +10,7 @@ import {
   toDateKey,
 } from "@/lib/booking/calendar";
 import type { BookingStore, TimeSlot } from "@/lib/booking/types";
+import { services } from "@/content/services";
 
 export function SpravaClient() {
   const [store, setStore] = useState<BookingStore | null>(null);
@@ -22,6 +23,14 @@ export function SpravaClient() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [phoneSlotId, setPhoneSlotId] = useState<string | null>(null);
+  const [phoneTime, setPhoneTime] = useState<string | null>(null);
+  const [phoneName, setPhoneName] = useState("");
+  const [phonePhone, setPhonePhone] = useState("");
+  const [phoneEmail, setPhoneEmail] = useState("");
+  const [phoneService, setPhoneService] = useState("");
+  const [phoneNote, setPhoneNote] = useState("");
 
   useEffect(() => {
     const now = new Date();
@@ -51,6 +60,16 @@ export function SpravaClient() {
     void load();
   }, [load]);
 
+  function resetPhoneForm() {
+    setPhoneSlotId(null);
+    setPhoneTime(null);
+    setPhoneName("");
+    setPhonePhone("");
+    setPhoneEmail("");
+    setPhoneService("");
+    setPhoneNote("");
+  }
+
   async function runAction(body: Record<string, unknown>) {
     setBusy(true);
     setMessage(null);
@@ -63,14 +82,31 @@ export function SpravaClient() {
       const data = await res.json();
       if (!res.ok) {
         setMessage(data.error || "Chyba");
-        return;
+        return false;
       }
       setStore(data as BookingStore);
       setMessage("Uloženo.");
       setSelectedTimes([]);
+      return true;
     } finally {
       setBusy(false);
     }
+  }
+
+  async function submitPhoneBooking(e: React.FormEvent) {
+    e.preventDefault();
+    if (!phoneTime) return;
+    const ok = await runAction({
+      action: "phoneBook",
+      date: selectedDate,
+      time: phoneTime,
+      name: phoneName,
+      phone: phonePhone,
+      email: phoneEmail || undefined,
+      service: phoneService || undefined,
+      note: phoneNote || "Rezervace telefonicky",
+    });
+    if (ok) resetPhoneForm();
   }
 
   const cells = buildMonthGrid(year, monthIndex);
@@ -91,6 +127,10 @@ export function SpravaClient() {
     .filter((b) => b.date >= todayKey)
     .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
+  const selectedAvailable = selectedTimes.filter((t) =>
+    daySlots.some((s) => s.time === t && s.status === "available"),
+  );
+
   if (!calReady) {
     return <p className="muted">Načítám správu…</p>;
   }
@@ -105,10 +145,19 @@ export function SpravaClient() {
         <div>
           <h1 className="sprava__title">Správa termínů</h1>
           <p className="muted">
-            Přidávejte volné časy, odebírejte je nebo vracjejte po zrušení.
-            Heslo zatím není — doplníme později.
+            Přidejte nebo odeberte volné časy. Když někdo zavolá, zapište rezervaci
+            sami — termín zmizí z online kalendáře. Heslo doplníme později.
           </p>
         </div>
+      </div>
+
+      <div className="sprava-legend">
+        <span>
+          <i className="sprava-dot sprava-dot--free" /> volný den / čas
+        </span>
+        <span>
+          <i className="sprava-dot sprava-dot--booked" /> má rezervaci
+        </span>
       </div>
 
       <div className="booking-wizard sprava__grid">
@@ -163,7 +212,11 @@ export function SpravaClient() {
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                  onClick={() => setSelectedDate(cell.date!)}
+                  onClick={() => {
+                    setSelectedDate(cell.date!);
+                    resetPhoneForm();
+                    setSelectedTimes([]);
+                  }}
                 >
                   {cell.day}
                 </button>
@@ -208,6 +261,20 @@ export function SpravaClient() {
             >
               Přidat volné časy
             </button>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              disabled={busy || selectedAvailable.length === 0}
+              onClick={() =>
+                runAction({
+                  action: "removeTimes",
+                  date: selectedDate,
+                  times: selectedAvailable,
+                })
+              }
+            >
+              Odebrat vybrané volné
+            </button>
           </div>
 
           <h4 className="sprava-subtitle">Termíny tohoto dne</h4>
@@ -215,68 +282,256 @@ export function SpravaClient() {
             {daySlots.length === 0 && <li className="muted">Žádné termíny</li>}
             {daySlots.map((slot) => {
               const booking = store?.bookings.find((b) => b.id === slot.bookingId);
+              const phoneOpen =
+                phoneSlotId === slot.id ||
+                (phoneTime === slot.time && !phoneSlotId && slot.status === "available");
               return (
-                <li key={slot.id} className="sprava-list__item">
-                  <div className="sprava-person">
-                    <p className="sprava-person__time">
-                      <strong>{slot.time}</strong>{" "}
-                      <span className={`sprava-badge sprava-badge--${slot.status}`}>
-                        {slot.status === "available" ? "volný" : "obsazený"}
-                      </span>
-                    </p>
-                    {booking ? (
-                      <dl className="sprava-person__meta">
-                        <div>
-                          <dt>Jméno</dt>
-                          <dd>{booking.name}</dd>
-                        </div>
-                        <div>
-                          <dt>Telefon</dt>
-                          <dd>
-                            <a href={`tel:${booking.phone.replace(/\s/g, "")}`}>
-                              {booking.phone}
-                            </a>
-                          </dd>
-                        </div>
-                        {booking.service ? (
+                <li key={slot.id} className="sprava-list__item sprava-list__item--stack">
+                  <div className="sprava-list__row">
+                    <div className="sprava-person">
+                      <p className="sprava-person__time">
+                        <strong>{slot.time}</strong>{" "}
+                        <span className={`sprava-badge sprava-badge--${slot.status}`}>
+                          {slot.status === "available" ? "volný" : "obsazený"}
+                        </span>
+                      </p>
+                      {booking ? (
+                        <dl className="sprava-person__meta">
                           <div>
-                            <dt>Služba</dt>
-                            <dd>{booking.service}</dd>
+                            <dt>Jméno</dt>
+                            <dd>{booking.name}</dd>
                           </div>
-                        ) : null}
-                      </dl>
-                    ) : null}
+                          <div>
+                            <dt>Telefon</dt>
+                            <dd>
+                              <a href={`tel:${booking.phone.replace(/\s/g, "")}`}>
+                                {booking.phone}
+                              </a>
+                            </dd>
+                          </div>
+                          {booking.service ? (
+                            <div>
+                              <dt>Služba</dt>
+                              <dd>{booking.service}</dd>
+                            </div>
+                          ) : null}
+                          {booking.note ? (
+                            <div>
+                              <dt>Pozn.</dt>
+                              <dd>{booking.note}</dd>
+                            </div>
+                          ) : null}
+                        </dl>
+                      ) : null}
+                    </div>
+                    <div className="sprava-list__btns">
+                      {slot.status === "available" && (
+                        <>
+                          <button
+                            type="button"
+                            className="btn btn--primary"
+                            disabled={busy}
+                            onClick={() => {
+                              setPhoneSlotId(slot.id);
+                              setPhoneTime(slot.time);
+                              setPhoneName("");
+                              setPhonePhone("");
+                              setPhoneEmail("");
+                              setPhoneService("");
+                              setPhoneNote("");
+                            }}
+                          >
+                            Telefonická rezervace
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn--ghost"
+                            disabled={busy}
+                            onClick={() =>
+                              runAction({ action: "remove", slotId: slot.id })
+                            }
+                          >
+                            Odebrat
+                          </button>
+                        </>
+                      )}
+                      {slot.status === "booked" && (
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          disabled={busy}
+                          onClick={() =>
+                            runAction({ action: "restore", slotId: slot.id })
+                          }
+                        >
+                          Uvolnit termín
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="sprava-list__btns">
-                    {slot.status === "available" && (
-                      <button
-                        type="button"
-                        className="btn btn--ghost"
-                        disabled={busy}
-                        onClick={() =>
-                          runAction({ action: "remove", slotId: slot.id })
-                        }
-                      >
-                        Odebrat
-                      </button>
-                    )}
-                    {slot.status === "booked" && (
-                      <button
-                        type="button"
-                        className="btn btn--ghost"
-                        disabled={busy}
-                        onClick={() =>
-                          runAction({ action: "restore", slotId: slot.id })
-                        }
-                      >
-                        Vrátit jako volný
-                      </button>
-                    )}
-                  </div>
+
+                  {phoneOpen && slot.status === "available" && (
+                    <form className="sprava-phone-form" onSubmit={submitPhoneBooking}>
+                      <p className="sprava-phone-form__title">
+                        Zápis telefonické rezervace · {selectedDate} {slot.time}
+                      </p>
+                      <div className="sprava-phone-form__grid">
+                        <label className="booking-field">
+                          <span>Jméno a příjmení</span>
+                          <input
+                            required
+                            value={phoneName}
+                            onChange={(e) => setPhoneName(e.target.value)}
+                            autoComplete="name"
+                          />
+                        </label>
+                        <label className="booking-field">
+                          <span>Telefon</span>
+                          <input
+                            required
+                            type="tel"
+                            value={phonePhone}
+                            onChange={(e) => setPhonePhone(e.target.value)}
+                            autoComplete="tel"
+                          />
+                        </label>
+                        <label className="booking-field">
+                          <span>E-mail (volitelné)</span>
+                          <input
+                            type="email"
+                            value={phoneEmail}
+                            onChange={(e) => setPhoneEmail(e.target.value)}
+                            autoComplete="email"
+                          />
+                        </label>
+                        <label className="booking-field">
+                          <span>Služba (volitelné)</span>
+                          <select
+                            value={phoneService}
+                            onChange={(e) => setPhoneService(e.target.value)}
+                          >
+                            <option value="">— nevybráno —</option>
+                            {services.map((s) => (
+                              <option key={s.id} value={s.title}>
+                                {s.title}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="booking-field sprava-phone-form__full">
+                          <span>Poznámka</span>
+                          <input
+                            value={phoneNote}
+                            onChange={(e) => setPhoneNote(e.target.value)}
+                            placeholder="Rezervace telefonicky"
+                          />
+                        </label>
+                      </div>
+                      <div className="sprava-actions">
+                        <button
+                          type="submit"
+                          className="btn btn--primary"
+                          disabled={busy}
+                        >
+                          Uložit rezervaci
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn--ghost"
+                          disabled={busy}
+                          onClick={resetPhoneForm}
+                        >
+                          Zrušit
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </li>
               );
             })}
           </ul>
+
+          <h4 className="sprava-subtitle">Rychlá telefonická rezervace nového času</h4>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Když klient zavolá na čas, který ještě není v kalendáři — vyberte nahoře
+            právě jeden čas, vyplňte údaje a uložte. Termín se vytvoří rovnou jako
+            obsazený a online už ho nikdo jiný nevezme.
+          </p>
+          <form
+            className="sprava-phone-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (selectedTimes.length !== 1) {
+                setMessage("Pro telefonickou rezervaci vyberte přesně jeden čas.");
+                return;
+              }
+              const ok = await runAction({
+                action: "phoneBook",
+                date: selectedDate,
+                time: selectedTimes[0],
+                name: phoneName,
+                phone: phonePhone,
+                email: phoneEmail || undefined,
+                service: phoneService || undefined,
+                note: phoneNote || "Rezervace telefonicky",
+              });
+              if (ok) resetPhoneForm();
+            }}
+          >
+            <div className="sprava-phone-form__grid">
+              <label className="booking-field">
+                <span>Jméno a příjmení</span>
+                <input
+                  required
+                  value={phoneName}
+                  onChange={(e) => setPhoneName(e.target.value)}
+                />
+              </label>
+              <label className="booking-field">
+                <span>Telefon</span>
+                <input
+                  required
+                  type="tel"
+                  value={phonePhone}
+                  onChange={(e) => setPhonePhone(e.target.value)}
+                />
+              </label>
+              <label className="booking-field">
+                <span>Vybraný čas</span>
+                <input
+                  readOnly
+                  value={
+                    selectedTimes.length === 1
+                      ? selectedTimes[0]
+                      : "Vyberte jeden čas výše"
+                  }
+                />
+              </label>
+              <label className="booking-field">
+                <span>Služba (volitelné)</span>
+                <select
+                  value={phoneService}
+                  onChange={(e) => setPhoneService(e.target.value)}
+                >
+                  <option value="">— nevybráno —</option>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.title}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="sprava-actions">
+              <button
+                type="submit"
+                className="btn btn--primary"
+                disabled={busy || selectedTimes.length !== 1}
+              >
+                Rezervovat vybraný čas (telefon)
+              </button>
+            </div>
+          </form>
 
           {message && <p className="sprava-msg">{message}</p>}
         </div>
@@ -317,6 +572,12 @@ export function SpravaClient() {
                       <dd>
                         <a href={`mailto:${b.email}`}>{b.email}</a>
                       </dd>
+                    </div>
+                  ) : null}
+                  {b.note ? (
+                    <div>
+                      <dt>Pozn.</dt>
+                      <dd>{b.note}</dd>
                     </div>
                   ) : null}
                 </dl>
