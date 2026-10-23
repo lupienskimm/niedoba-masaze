@@ -92,41 +92,46 @@ function BookingCloser() {
   );
 }
 
-function PhotoIntro({
-  title,
-  showHeroCtas = false,
-}: {
-  title: string;
-  showHeroCtas?: boolean;
-}) {
+function PhotoIntro({ showHeroCtas = false }: { showHeroCtas?: boolean }) {
   return (
     <section className="v2-hero">
-      <div className="v2-hero__photo">
+      <div className="v2-hero__media">
         <Image
-          src="/images/omne.jpg"
-          alt="Robert Niedoba"
-          width={220}
-          height={220}
+          src="/images/hero-massage.jpg"
+          alt=""
+          fill
           priority
+          sizes="100vw"
         />
       </div>
-      <p className="v2-hero__brand">{site.name}</p>
-      <h1 className="v2-hero__title">{title}</h1>
-      <p className="v2-hero__meta">{site.openingHoursShort}</p>
-      <p className="v2-hero__note">{site.openingNote}</p>
-      <div
-        className="v2-hero__actions"
-        {...(showHeroCtas ? { "data-hero-ctas": true } : {})}
-      >
-        <Link href="/objednani" className="btn btn--primary v2-hero__cta">
-          Objednat masáž
-        </Link>
-        <a
-          href={`tel:${site.phoneRaw}`}
-          className="btn btn--ghost v2-hero__cta"
-        >
-          Zavolat {site.phoneDisplay}
-        </a>
+      <div className="v2-hero__shade" />
+      <div className="v2-hero__split">
+        <div className="v2-hero__person">
+          <div className="v2-hero__photo">
+            <Image
+              src="/images/omne.jpg"
+              alt="Robert Niedoba"
+              width={220}
+              height={220}
+              priority
+            />
+          </div>
+          <p className="v2-hero__caption">{site.aboutShort}</p>
+        </div>
+        <div className="v2-hero__copy">
+          <p className="v2-hero__lead">{site.heroLead}</p>
+          <div
+            className="v2-hero__actions"
+            {...(showHeroCtas ? { "data-hero-ctas": true } : {})}
+          >
+            <Link href="/objednani" className="btn btn--primary v2-hero__cta">
+              Objednat
+            </Link>
+            <Link href="/sluzby" className="btn btn--ghost v2-hero__cta">
+              Služby
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -137,7 +142,7 @@ export default function HomePage() {
     <>
       {/* Mobile only — always V2-style */}
       <div className="home-mobile">
-        <PhotoIntro title={site.aboutShort} showHeroCtas />
+        <PhotoIntro showHeroCtas />
         <QuickPricing />
         <FeaturedServices />
         <BookingCloser />
@@ -340,7 +345,7 @@ export default function HomePage() {
 
       {/* Desktop V4 — stejný design jako V3, pořadí jako mobil */}
       <div className="home-v4">
-        <PhotoIntro title={site.heroTitle} />
+        <PhotoIntro />
         <section className="v4-atmosphere">
           <div className="v4-atmosphere__media">
             <Image
