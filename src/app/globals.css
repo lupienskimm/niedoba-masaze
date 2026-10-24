@@ -757,8 +757,9 @@ body:has(.page-kontakt) .site-footer__grid {
 }
 
 .page-hero__bar {
-  width: min(100%, var(--max));
-  margin-inline: auto;
+  width: 100%;
+  margin-inline: 0;
+  /* Match .section horizontal padding so Domů/Zpět share the .wrap left edge */
   padding-inline: calc(var(--u) * 3);
 }
 
@@ -769,6 +770,8 @@ body:has(.page-kontakt) .site-footer__grid {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .page-nav__btn {
@@ -1635,7 +1638,7 @@ body {
 }
 
 .page-hero {
-  margin: calc(var(--u) * 2) calc(var(--u) * 2) 0;
+  margin: calc(var(--u) * 2) 0 0;
   min-height: auto;
   box-shadow: none;
   border-radius: 0;
