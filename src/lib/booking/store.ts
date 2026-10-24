@@ -285,7 +285,9 @@ export function updateBookingContact(
 ): { store: BookingStore; booking: Booking } | { error: string } {
   const booking = store.bookings.find((b) => b.id === bookingId);
   if (!booking) return { error: "Rezervace nenalezena." };
-  if (input.name?.trim()) booking.name = input.name.trim();
+  if (input.name !== undefined) {
+    booking.name = input.name.trim() || "Bez jména";
+  }
   if (input.phone !== undefined) booking.phone = input.phone.trim();
   if (input.email !== undefined) booking.email = input.email.trim();
   if (input.service !== undefined) {
@@ -372,7 +374,7 @@ export function createBooking(
     slotId: string;
     name: string;
     email?: string;
-    phone: string;
+    phone?: string;
     note?: string;
     service?: string;
   },
@@ -386,9 +388,9 @@ export function createBooking(
     slotId: slot.id,
     date: slot.date,
     time: slot.time,
-    name: input.name.trim(),
+    name: input.name.trim() || "Bez jména",
     email: (input.email || "").trim(),
-    phone: input.phone.trim(),
+    phone: (input.phone || "").trim(),
     note: input.note?.trim() || undefined,
     service: input.service?.trim() || undefined,
     createdAt: new Date().toISOString(),
@@ -409,16 +411,17 @@ export function manualPhoneBooking(
   input: {
     date: string;
     time: string;
-    name: string;
-    phone: string;
+    name?: string;
+    phone?: string;
     email?: string;
     note?: string;
     service?: string;
   },
 ): { store: BookingStore; booking: Booking } | { error: string } {
-  const name = input.name.trim();
-  const phone = input.phone.trim();
-  if (!name || !phone) return { error: "Vyplňte jméno a telefon." };
+  // Admin / phone booking: all contact fields are optional
+  const name = (input.name || "").trim() || "Bez jména";
+  const phone = (input.phone || "").trim();
+  const email = (input.email || "").trim();
 
   let slot = store.slots.find(
     (s) => s.date === input.date && s.time === input.time,
@@ -442,7 +445,7 @@ export function manualPhoneBooking(
     slotId: slot.id,
     name,
     phone,
-    email: input.email,
+    email,
     note: input.note || "Rezervace telefonicky",
     service: input.service,
   });

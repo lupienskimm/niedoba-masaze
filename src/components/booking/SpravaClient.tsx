@@ -457,18 +457,16 @@ export function SpravaClient() {
                           </label>
                         )}
                         <label className="booking-field">
-                          <span>Jméno a příjmení</span>
+                          <span>Jméno a příjmení (volitelné)</span>
                           <input
-                            required
                             value={phoneName}
                             onChange={(e) => setPhoneName(e.target.value)}
                             autoComplete="name"
                           />
                         </label>
                         <label className="booking-field">
-                          <span>Telefon</span>
+                          <span>Telefon (volitelné)</span>
                           <input
-                            required
                             type="tel"
                             value={phonePhone}
                             onChange={(e) => setPhonePhone(e.target.value)}
@@ -579,24 +577,22 @@ export function SpravaClient() {
                 </label>
               )}
               <label className="booking-field">
-                <span>Jméno a příjmení</span>
+                <span>Jméno a příjmení (volitelné)</span>
                 <input
-                  required
                   value={phoneName}
                   onChange={(e) => setPhoneName(e.target.value)}
                 />
               </label>
               <label className="booking-field">
-                <span>Telefon</span>
+                <span>Telefon (volitelné)</span>
                 <input
-                  required
                   type="tel"
                   value={phonePhone}
                   onChange={(e) => setPhonePhone(e.target.value)}
                 />
               </label>
               <label className="booking-field">
-                <span>E-mail (pro potvrzení / upomínky)</span>
+                <span>E-mail (volitelné)</span>
                 <input
                   type="email"
                   value={phoneEmail}
@@ -628,6 +624,9 @@ export function SpravaClient() {
                   ))}
                 </select>
               </label>
+              <p className="muted sprava-phone-form__full" style={{ margin: 0 }}>
+                V adminu jsou všechna pole volitelná — stačí vybrat čas a uložit.
+              </p>
             </div>
             <div className="sprava-actions">
               <button

@@ -283,15 +283,14 @@ export function BookingActions({
                 </label>
               )}
               <label className="booking-field">
-                <span>Jméno</span>
+                <span>Jméno (volitelné)</span>
                 <input
-                  required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </label>
               <label className="booking-field">
-                <span>Telefon</span>
+                <span>Telefon (volitelné)</span>
                 <input
                   type="tel"
                   value={phone}
@@ -299,7 +298,7 @@ export function BookingActions({
                 />
               </label>
               <label className="booking-field">
-                <span>E-mail</span>
+                <span>E-mail (volitelné)</span>
                 <input
                   type="email"
                   value={email}

@@ -102,24 +102,18 @@ export async function POST(request: Request) {
       return NextResponse.json(store);
     }
 
-    if (
-      body.action === "phoneBook" &&
-      body.date &&
-      body.time &&
-      body.name &&
-      body.phone
-    ) {
+    if (body.action === "phoneBook" && body.date && body.time) {
       let error: string | null = null;
       const store = await updateStore((s) => {
-        let name = body.name!;
-        let phone = body.phone!;
-        let email = body.email;
+        let name = body.name || "";
+        let phone = body.phone || "";
+        let email = body.email || "";
         if (body.clientId) {
           const client = s.clients.find((c) => c.id === body.clientId);
           if (client) {
-            name = client.name;
-            phone = client.phone || phone;
-            email = client.email || email;
+            name = name || client.name;
+            phone = phone || client.phone;
+            email = email || client.email;
           }
         }
         const result = manualPhoneBooking(s, {

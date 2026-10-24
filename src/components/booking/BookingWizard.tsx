@@ -314,7 +314,7 @@ export function BookingWizard() {
             </fieldset>
 
             <label className="booking-field">
-              <span>Jméno a příjmení</span>
+              <span>Jméno a příjmení (povinné)</span>
               <input
                 required
                 value={name}
@@ -323,7 +323,7 @@ export function BookingWizard() {
               />
             </label>
             <label className="booking-field">
-              <span>E-mail</span>
+              <span>E-mail (povinné)</span>
               <input
                 required
                 type="email"
@@ -333,7 +333,7 @@ export function BookingWizard() {
               />
             </label>
             <label className="booking-field">
-              <span>Telefon</span>
+              <span>Telefon (povinné)</span>
               <input
                 required
                 type="tel"
