@@ -16,8 +16,6 @@ import {
   upsertAvailableSlots,
   upsertClient,
 } from "@/lib/booking/store";
-import type { Booking } from "@/lib/booking/types";
-
 type Action =
   | "add"
   | "remove"
