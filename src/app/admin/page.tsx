@@ -3,14 +3,14 @@ import { SpravaClient } from "@/components/booking/SpravaClient";
 import { PageHero } from "@/components/PageHero";
 
 export const metadata: Metadata = {
-  title: "Správa termínů",
+  title: "Admin – správa termínů",
   robots: { index: false, follow: false },
 };
 
-export default function SpravaPage() {
+export default function AdminPage() {
   return (
     <>
-      <PageHero title="SPRÁVA" />
+      <PageHero title="ADMIN" />
       <section className="section">
         <div className="wrap">
           <SpravaClient />

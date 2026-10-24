@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  async redirects() {
+    return [
+      { source: "/sprava", destination: "/admin", permanent: true },
+      { source: "/sprava/:path*", destination: "/admin/:path*", permanent: true },
+      { source: "/api/sprava/:path*", destination: "/api/admin/:path*", permanent: true },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200],

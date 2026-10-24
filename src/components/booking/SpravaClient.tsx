@@ -44,7 +44,7 @@ export function SpravaClient() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/sprava/slots");
+      const res = await fetch("/api/admin/slots");
       if (!res.ok) {
         setLoadError("Nepodařilo se načíst termíny.");
         return;
@@ -75,7 +75,7 @@ export function SpravaClient() {
     setBusy(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/sprava/slots", {
+      const res = await fetch("/api/admin/slots", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
