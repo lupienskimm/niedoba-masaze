@@ -10,6 +10,7 @@ import {
   shiftMonth,
   toDateKey,
 } from "@/lib/booking/calendar";
+import { BookingActions } from "@/components/booking/BookingActions";
 import type { BookingStore, TimeSlot } from "@/lib/booking/types";
 import { services } from "@/content/services";
 
@@ -32,6 +33,7 @@ export function SpravaClient() {
   const [phoneEmail, setPhoneEmail] = useState("");
   const [phoneService, setPhoneService] = useState("");
   const [phoneNote, setPhoneNote] = useState("");
+  const [phoneClientId, setPhoneClientId] = useState("");
 
   useEffect(() => {
     const now = new Date();
@@ -69,6 +71,17 @@ export function SpravaClient() {
     setPhoneEmail("");
     setPhoneService("");
     setPhoneNote("");
+    setPhoneClientId("");
+  }
+
+  function applyClient(clientId: string) {
+    setPhoneClientId(clientId);
+    const c = store?.clients.find((x) => x.id === clientId);
+    if (!c) return;
+    setPhoneName(c.name);
+    setPhonePhone(c.phone || "");
+    setPhoneEmail(c.email || "");
+    if (c.note) setPhoneNote(c.note);
   }
 
   async function runAction(body: Record<string, unknown>) {
@@ -82,11 +95,27 @@ export function SpravaClient() {
       });
       const data = await res.json();
       if (!res.ok) {
+        if (data.store) setStore(data.store as BookingStore);
         setMessage(data.error || "Chyba");
         return false;
       }
-      setStore(data as BookingStore);
-      setMessage("Uloženo.");
+      const { _meta, ...rest } = data as BookingStore & {
+        _meta?: { sent?: boolean; kind?: string };
+      };
+      setStore(rest as BookingStore);
+      if (body.action === "notify" && _meta?.sent) {
+        setMessage("E-mail s info o rezervaci odeslán.");
+      } else if (body.action === "cancelBooking" || body.action === "restore") {
+        setMessage("Rezervace zrušena, termín uvolněn. Klient upozorněn e-mailem (pokud má e-mail).");
+      } else if (body.action === "move") {
+        setMessage("Termín přesunut, klient upozorněn e-mailem.");
+      } else if (body.action === "extend") {
+        setMessage("Rezervace prodloužena, klient upozorněn e-mailem.");
+      } else if (body.action === "saveClient") {
+        setMessage("Klient uložen do seznamu.");
+      } else {
+        setMessage("Uloženo.");
+      }
       setSelectedTimes([]);
       return true;
     } finally {
@@ -106,9 +135,16 @@ export function SpravaClient() {
       email: phoneEmail || undefined,
       service: phoneService || undefined,
       note: phoneNote || "Rezervace telefonicky",
+      clientId: phoneClientId || undefined,
     });
     if (ok) resetPhoneForm();
   }
+
+  const clients = store?.clients || [];
+  const clientsSorted = useMemo(
+    () => [...clients].sort((a, b) => a.name.localeCompare(b.name, "cs")),
+    [clients],
+  );
 
   const cells = buildMonthGrid(year, monthIndex);
   const slotsByDate = useMemo(() => {
@@ -284,6 +320,14 @@ export function SpravaClient() {
             {daySlots.length === 0 && <li className="muted">Žádné termíny</li>}
             {daySlots.map((slot) => {
               const booking = store?.bookings.find((b) => b.id === slot.bookingId);
+              // Hide extension hours — they are covered by the primary booking row
+              if (
+                booking &&
+                slot.status === "booked" &&
+                booking.time !== slot.time
+              ) {
+                return null;
+              }
               const phoneOpen =
                 phoneSlotId === slot.id ||
                 (phoneTime === slot.time && !phoneSlotId && slot.status === "available");
@@ -292,7 +336,12 @@ export function SpravaClient() {
                   <div className="sprava-list__row">
                     <div className="sprava-person">
                       <p className="sprava-person__time">
-                        <strong>{hourBlockLabel(slot.time)}</strong>{" "}
+                        <strong>
+                          {hourBlockLabel(
+                            slot.time,
+                            booking?.durationHours ?? 1,
+                          )}
+                        </strong>{" "}
                         <span className={`sprava-badge sprava-badge--${slot.status}`}>
                           {slot.status === "available" ? "volný" : "obsazený"}
                         </span>
@@ -303,16 +352,28 @@ export function SpravaClient() {
                             <dt>Jméno</dt>
                             <dd>{booking.name}</dd>
                           </div>
-                          {booking.phone ? (
                           <div>
                             <dt>Telefon</dt>
                             <dd>
-                              <a href={`tel:${booking.phone.replace(/\s/g, "")}`}>
-                                {booking.phone}
-                              </a>
+                              {booking.phone ? (
+                                <a href={`tel:${booking.phone.replace(/\s/g, "")}`}>
+                                  {booking.phone}
+                                </a>
+                              ) : (
+                                <span className="muted">doplnit</span>
+                              )}
                             </dd>
                           </div>
-                          ) : null}
+                          <div>
+                            <dt>E-mail</dt>
+                            <dd>
+                              {booking.email ? (
+                                <a href={`mailto:${booking.email}`}>{booking.email}</a>
+                              ) : (
+                                <span className="muted">doplnit</span>
+                              )}
+                            </dd>
+                          </div>
                           {booking.service ? (
                             <div>
                               <dt>Služba</dt>
@@ -359,17 +420,13 @@ export function SpravaClient() {
                           </button>
                         </>
                       )}
-                      {slot.status === "booked" && (
-                        <button
-                          type="button"
-                          className="btn btn--ghost"
-                          disabled={busy}
-                          onClick={() =>
-                            runAction({ action: "restore", slotId: slot.id })
-                          }
-                        >
-                          Uvolnit termín
-                        </button>
+                      {slot.status === "booked" && booking && (
+                        <BookingActions
+                          booking={booking}
+                          busy={busy}
+                          clients={clients}
+                          runAction={runAction}
+                        />
                       )}
                     </div>
                   </div>
@@ -381,6 +438,24 @@ export function SpravaClient() {
                         {hourBlockLabel(slot.time)}
                       </p>
                       <div className="sprava-phone-form__grid">
+                        {clientsSorted.length > 0 && (
+                          <label className="booking-field sprava-phone-form__full">
+                            <span>Vybrat uloženého klienta</span>
+                            <select
+                              value={phoneClientId}
+                              onChange={(e) => applyClient(e.target.value)}
+                            >
+                              <option value="">— nový klient / ručně —</option>
+                              {clientsSorted.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                  {c.name}
+                                  {c.phone ? ` · ${c.phone}` : ""}
+                                  {c.email ? ` · ${c.email}` : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
                         <label className="booking-field">
                           <span>Jméno a příjmení</span>
                           <input
@@ -479,11 +554,30 @@ export function SpravaClient() {
                 email: phoneEmail || undefined,
                 service: phoneService || undefined,
                 note: phoneNote || "Rezervace telefonicky",
+                clientId: phoneClientId || undefined,
               });
               if (ok) resetPhoneForm();
             }}
           >
             <div className="sprava-phone-form__grid">
+              {clientsSorted.length > 0 && (
+                <label className="booking-field sprava-phone-form__full">
+                  <span>Vybrat uloženého klienta</span>
+                  <select
+                    value={phoneClientId}
+                    onChange={(e) => applyClient(e.target.value)}
+                  >
+                    <option value="">— nový klient / ručně —</option>
+                    {clientsSorted.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                        {c.phone ? ` · ${c.phone}` : ""}
+                        {c.email ? ` · ${c.email}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="booking-field">
                 <span>Jméno a příjmení</span>
                 <input
@@ -499,6 +593,14 @@ export function SpravaClient() {
                   type="tel"
                   value={phonePhone}
                   onChange={(e) => setPhonePhone(e.target.value)}
+                />
+              </label>
+              <label className="booking-field">
+                <span>E-mail (pro potvrzení / upomínky)</span>
+                <input
+                  type="email"
+                  value={phoneEmail}
+                  onChange={(e) => setPhoneEmail(e.target.value)}
                 />
               </label>
               <label className="booking-field">
@@ -547,56 +649,111 @@ export function SpravaClient() {
         <ul className="sprava-list">
           {booked.length === 0 && <li className="muted">Zatím žádné</li>}
           {booked.map((b) => (
-            <li key={b.id} className="sprava-list__item">
-              <div className="sprava-person">
-                <p className="sprava-person__time">
-                  <strong>
-                    {b.date} · {hourBlockLabel(b.time)}
-                  </strong>
-                </p>
-                <dl className="sprava-person__meta">
-                  <div>
-                    <dt>Jméno</dt>
-                    <dd>{b.name}</dd>
-                  </div>
-                  {b.phone ? (
-                  <div>
-                    <dt>Telefon</dt>
-                    <dd>
-                      <a href={`tel:${b.phone.replace(/\s/g, "")}`}>{b.phone}</a>
-                    </dd>
-                  </div>
-                  ) : null}
-                  {b.service ? (
+            <li key={b.id} className="sprava-list__item sprava-list__item--stack">
+              <div className="sprava-list__row">
+                <div className="sprava-person">
+                  <p className="sprava-person__time">
+                    <strong>
+                      {b.date} · {hourBlockLabel(b.time, b.durationHours ?? 1)}
+                    </strong>
+                  </p>
+                  <dl className="sprava-person__meta">
                     <div>
-                      <dt>Služba</dt>
-                      <dd>{b.service}</dd>
+                      <dt>Jméno</dt>
+                      <dd>{b.name}</dd>
                     </div>
-                  ) : null}
-                  {b.email ? (
+                    <div>
+                      <dt>Telefon</dt>
+                      <dd>
+                        {b.phone ? (
+                          <a href={`tel:${b.phone.replace(/\s/g, "")}`}>{b.phone}</a>
+                        ) : (
+                          <span className="muted">doplnit</span>
+                        )}
+                      </dd>
+                    </div>
                     <div>
                       <dt>E-mail</dt>
                       <dd>
-                        <a href={`mailto:${b.email}`}>{b.email}</a>
+                        {b.email ? (
+                          <a href={`mailto:${b.email}`}>{b.email}</a>
+                        ) : (
+                          <span className="muted">doplnit</span>
+                        )}
                       </dd>
                     </div>
-                  ) : null}
-                  {b.note ? (
-                    <div>
-                      <dt>Pozn.</dt>
-                      <dd>{b.note}</dd>
-                    </div>
-                  ) : null}
+                    {b.service ? (
+                      <div>
+                        <dt>Služba</dt>
+                        <dd>{b.service}</dd>
+                      </div>
+                    ) : null}
+                    {b.note ? (
+                      <div>
+                        <dt>Pozn.</dt>
+                        <dd>{b.note}</dd>
+                      </div>
+                    ) : null}
+                    {b.lastNotifiedAt ? (
+                      <div>
+                        <dt>Poslední e-mail</dt>
+                        <dd>
+                          {new Date(b.lastNotifiedAt).toLocaleString("cs-CZ")}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </div>
+                <BookingActions
+                  booking={b}
+                  busy={busy}
+                  clients={clients}
+                  runAction={runAction}
+                />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="sprava-bookings">
+        <h3 className="sprava-subtitle">Uložení klienti</h3>
+        <ul className="sprava-list">
+          {clientsSorted.length === 0 && (
+            <li className="muted">
+              Zatím žádní — uloží se automaticky při rezervaci s telefonem/e-mailem,
+              nebo přes „Uložit do klientů“ u rezervace.
+            </li>
+          )}
+          {clientsSorted.map((c) => (
+            <li key={c.id} className="sprava-list__item">
+              <div className="sprava-person">
+                <p className="sprava-person__time">
+                  <strong>{c.name}</strong>
+                </p>
+                <dl className="sprava-person__meta">
+                  <div>
+                    <dt>Telefon</dt>
+                    <dd>
+                      {c.phone ? (
+                        <a href={`tel:${c.phone.replace(/\s/g, "")}`}>{c.phone}</a>
+                      ) : (
+                        "—"
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>E-mail</dt>
+                    <dd>
+                      {c.email ? (
+                        <a href={`mailto:${c.email}`}>{c.email}</a>
+                      ) : (
+                        "—"
+                      )}
+                    </dd>
+                  </div>
                 </dl>
               </div>
-              <button
-                type="button"
-                className="btn btn--ghost"
-                disabled={busy}
-                onClick={() => runAction({ action: "restore", slotId: b.slotId })}
-              >
-                Zrušit a uvolnit
-              </button>
             </li>
           ))}
         </ul>

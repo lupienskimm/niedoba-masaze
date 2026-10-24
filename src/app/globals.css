@@ -171,7 +171,6 @@ img {
 
 .btn:hover {
   transform: translateY(-2px);
-  color: var(--btn-ink);
 }
 
 .btn--primary {
@@ -179,10 +178,34 @@ img {
   color: var(--btn-ink);
 }
 
+.btn--primary:hover {
+  background: var(--brand-mid);
+  color: #ffffff;
+}
+
 .btn--ghost {
   background: transparent;
   color: var(--ink);
   border-color: var(--ink);
+}
+
+.btn--ghost:hover,
+.btn--ghost.is-open {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+  color: #ffffff;
+}
+
+.btn--danger {
+  background: transparent;
+  color: #8b1e1e;
+  border-color: rgba(139, 30, 30, 0.45);
+}
+
+.btn--danger:hover {
+  background: #8b1e1e;
+  border-color: #8b1e1e;
+  color: #ffffff;
 }
 
 /* ─── Header ─── */
@@ -1299,8 +1322,15 @@ body {
 
 .btn--ghost {
   box-shadow: none;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(8px);
+}
+
+.btn--ghost:hover,
+.btn--ghost.is-open {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+  color: #ffffff;
 }
 
 .hero {
@@ -3045,6 +3075,52 @@ body:has(.site-nav-overlay.is-open) .mobile-quickbar {
   border: 1px solid rgba(30, 58, 43, 0.15);
   padding: 0.55rem 0.75rem;
   background: #fff;
+}
+
+.booking-actions {
+  display: grid;
+  gap: calc(var(--u) * 1.25);
+  justify-items: stretch;
+  min-width: min(100%, 220px);
+}
+
+.booking-actions__toggle {
+  width: 100%;
+}
+
+.booking-actions__panel {
+  display: grid;
+  gap: calc(var(--u) * 1.5);
+  padding: calc(var(--u) * 1.75);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(30, 58, 43, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.booking-actions__summary {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+.booking-actions__summary a {
+  color: var(--brand-deep);
+}
+
+.booking-actions__grid {
+  display: grid;
+  gap: calc(var(--u) * 1);
+}
+
+.booking-actions__grid .btn,
+.booking-actions__form .btn {
+  width: 100%;
+}
+
+.booking-actions__form {
+  display: grid;
+  gap: calc(var(--u) * 1.25);
 }
 
 @media (max-width: 720px) {

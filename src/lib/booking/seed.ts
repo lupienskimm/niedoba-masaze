@@ -107,6 +107,7 @@ export function seedDemoSlots(store: BookingStore): BookingStore {
   return {
     ...store,
     slots,
+    clients: store.clients ?? [],
     seedVersion: BOOKING_SEED_VERSION,
     updatedAt: new Date().toISOString(),
   };
@@ -124,6 +125,7 @@ export function seedDemoBookings(store: BookingStore): BookingStore {
     ...store,
     slots,
     bookings,
+    clients: store.clients ?? [],
     seedVersion: BOOKING_SEED_VERSION,
     updatedAt: new Date().toISOString(),
   };
@@ -190,6 +192,7 @@ export function migrateToHourlyRealBookings(store: BookingStore): BookingStore {
     ...store,
     slots,
     bookings,
+    clients: store.clients ?? [],
     seedVersion: BOOKING_SEED_VERSION,
     updatedAt: new Date().toISOString(),
   };

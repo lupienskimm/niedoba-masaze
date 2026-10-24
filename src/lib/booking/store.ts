@@ -11,6 +11,7 @@ import {
   emptyStore,
   type Booking,
   type BookingStore,
+  type Client,
   type TimeSlot,
 } from "@/lib/booking/types";
 
@@ -62,6 +63,10 @@ export async function loadStore(): Promise<BookingStore> {
   }
   if (!store) store = await readLocal();
   let changed = false;
+  if (!Array.isArray(store.clients)) {
+    store.clients = [];
+    changed = true;
+  }
   if ((store.seedVersion ?? 0) < BOOKING_SEED_VERSION) {
     store = migrateToHourlyRealBookings(store);
     changed = true;
@@ -72,6 +77,10 @@ export async function loadStore(): Promise<BookingStore> {
   }
   if (store.bookings.length === 0) {
     store = seedDemoBookings(store);
+    changed = true;
+  }
+  if (!Array.isArray(store.clients)) {
+    store.clients = [];
     changed = true;
   }
   if (changed) await saveStore(store);
@@ -149,10 +158,211 @@ export function restoreSlot(store: BookingStore, slotId: string) {
   const slot = store.slots.find((s) => s.id === slotId);
   if (!slot) return store;
   if (slot.bookingId) {
+    releaseBookingSlots(store, slot.bookingId);
     store.bookings = store.bookings.filter((b) => b.id !== slot.bookingId);
+  } else {
+    slot.status = "available";
+    delete slot.bookingId;
   }
-  slot.status = "available";
-  delete slot.bookingId;
+  return store;
+}
+
+function nextHour(time: string) {
+  const [h, m = "00"] = time.split(":");
+  return `${String(Number(h) + 1).padStart(2, "0")}:${m.padStart(2, "0")}`;
+}
+
+function ensureSlot(
+  store: BookingStore,
+  date: string,
+  time: string,
+): TimeSlot | { error: string } {
+  let slot = store.slots.find((s) => s.date === date && s.time === time);
+  if (slot?.status === "booked") {
+    return { error: `Čas ${time} už je obsazený.` };
+  }
+  if (!slot) {
+    slot = {
+      id: makeId("slot"),
+      date,
+      time,
+      status: "available",
+    };
+    store.slots.push(slot);
+  }
+  return slot;
+}
+
+function releaseBookingSlots(store: BookingStore, bookingId: string) {
+  for (const s of store.slots) {
+    if (s.bookingId === bookingId) {
+      s.status = "available";
+      delete s.bookingId;
+    }
+  }
+}
+
+function occupyHours(
+  store: BookingStore,
+  bookingId: string,
+  date: string,
+  startTime: string,
+  hours: number,
+): { error: string } | null {
+  let time = startTime;
+  for (let i = 0; i < hours; i++) {
+    const slotOrErr = ensureSlot(store, date, time);
+    if ("error" in slotOrErr) return slotOrErr;
+    const slot = slotOrErr;
+    if (slot.status === "booked" && slot.bookingId !== bookingId) {
+      return { error: `Čas ${time} už je obsazený.` };
+    }
+    slot.status = "booked";
+    slot.bookingId = bookingId;
+    time = nextHour(time);
+  }
+  return null;
+}
+
+export function upsertClient(
+  store: BookingStore,
+  input: { name: string; phone: string; email?: string; note?: string },
+): { store: BookingStore; client: Client } | { error: string } {
+  const name = input.name.trim();
+  const phone = input.phone.trim();
+  const email = (input.email || "").trim().toLowerCase();
+  if (!name) return { error: "Vyplňte jméno klienta." };
+  if (!phone && !email) {
+    return { error: "Pro uložení klienta vyplňte telefon nebo e-mail." };
+  }
+
+  const existing = store.clients.find(
+    (c) =>
+      (email && c.email.toLowerCase() === email) ||
+      (phone && c.phone.replace(/\s/g, "") === phone.replace(/\s/g, "")),
+  );
+
+  const now = new Date().toISOString();
+  if (existing) {
+    existing.name = name;
+    if (phone) existing.phone = phone;
+    if (email) existing.email = email;
+    if (input.note?.trim()) existing.note = input.note.trim();
+    existing.updatedAt = now;
+    return { store, client: existing };
+  }
+
+  const client: Client = {
+    id: makeId("client"),
+    name,
+    phone,
+    email,
+    note: input.note?.trim() || undefined,
+    createdAt: now,
+    updatedAt: now,
+  };
+  store.clients.unshift(client);
+  return { store, client };
+}
+
+export function rememberClientFromBooking(store: BookingStore, booking: Booking) {
+  if (!booking.phone?.trim() && !booking.email?.trim()) return store;
+  const result = upsertClient(store, {
+    name: booking.name,
+    phone: booking.phone,
+    email: booking.email,
+    note: booking.note,
+  });
+  if ("error" in result) return store;
+  booking.clientId = result.client.id;
+  return result.store;
+}
+
+export function updateBookingContact(
+  store: BookingStore,
+  bookingId: string,
+  input: { name?: string; phone?: string; email?: string; service?: string; note?: string },
+): { store: BookingStore; booking: Booking } | { error: string } {
+  const booking = store.bookings.find((b) => b.id === bookingId);
+  if (!booking) return { error: "Rezervace nenalezena." };
+  if (input.name?.trim()) booking.name = input.name.trim();
+  if (input.phone !== undefined) booking.phone = input.phone.trim();
+  if (input.email !== undefined) booking.email = input.email.trim();
+  if (input.service !== undefined) {
+    booking.service = input.service.trim() || undefined;
+  }
+  if (input.note !== undefined) booking.note = input.note.trim() || undefined;
+  return { store, booking };
+}
+
+export function moveBooking(
+  store: BookingStore,
+  bookingId: string,
+  date: string,
+  time: string,
+): { store: BookingStore; booking: Booking } | { error: string } {
+  const booking = store.bookings.find((b) => b.id === bookingId);
+  if (!booking) return { error: "Rezervace nenalezena." };
+  const hours = Math.max(1, booking.durationHours ?? 1);
+
+  releaseBookingSlots(store, bookingId);
+  const err = occupyHours(store, bookingId, date, time, hours);
+  if (err) {
+    // rollback to original
+    occupyHours(store, bookingId, booking.date, booking.time, hours);
+    return err;
+  }
+
+  const primary = store.slots.find((s) => s.date === date && s.time === time);
+  booking.date = date;
+  booking.time = time;
+  if (primary) booking.slotId = primary.id;
+  return { store, booking };
+}
+
+export function extendBooking(
+  store: BookingStore,
+  bookingId: string,
+  extraHours = 1,
+): { store: BookingStore; booking: Booking } | { error: string } {
+  const booking = store.bookings.find((b) => b.id === bookingId);
+  if (!booking) return { error: "Rezervace nenalezena." };
+  const current = Math.max(1, booking.durationHours ?? 1);
+  const next = current + Math.max(1, extraHours);
+
+  let time = booking.time;
+  for (let i = 0; i < current; i++) time = nextHour(time);
+
+  for (let i = 0; i < extraHours; i++) {
+    const slotOrErr = ensureSlot(store, booking.date, time);
+    if ("error" in slotOrErr) return slotOrErr;
+    const slot = slotOrErr;
+    if (slot.status === "booked" && slot.bookingId !== bookingId) {
+      return { error: `Nelze prodloužit — ${time} je obsazený.` };
+    }
+    slot.status = "booked";
+    slot.bookingId = bookingId;
+    time = nextHour(time);
+  }
+
+  booking.durationHours = next;
+  return { store, booking };
+}
+
+export function cancelBookingById(
+  store: BookingStore,
+  bookingId: string,
+): { store: BookingStore; booking: Booking } | { error: string } {
+  const booking = store.bookings.find((b) => b.id === bookingId);
+  if (!booking) return { error: "Rezervace nenalezena." };
+  releaseBookingSlots(store, bookingId);
+  store.bookings = store.bookings.filter((b) => b.id !== bookingId);
+  return { store, booking };
+}
+
+export function markBookingNotified(store: BookingStore, bookingId: string) {
+  const booking = store.bookings.find((b) => b.id === bookingId);
+  if (booking) booking.lastNotifiedAt = new Date().toISOString();
   return store;
 }
 
@@ -187,7 +397,9 @@ export function createBooking(
 
   slot.status = "booked";
   slot.bookingId = booking.id;
+  booking.durationHours = 1;
   store.bookings.unshift(booking);
+  rememberClientFromBooking(store, booking);
   return { store, booking };
 }
 
@@ -252,11 +464,5 @@ export function removeAvailableTimes(
 export function cancelBookingByToken(store: BookingStore, token: string) {
   const booking = store.bookings.find((b) => b.cancelToken === token);
   if (!booking) return { error: "Rezervace nenalezena." as const };
-  const slot = store.slots.find((s) => s.id === booking.slotId);
-  if (slot) {
-    slot.status = "available";
-    delete slot.bookingId;
-  }
-  store.bookings = store.bookings.filter((b) => b.id !== booking.id);
-  return { store, booking };
+  return cancelBookingById(store, booking.id);
 }
