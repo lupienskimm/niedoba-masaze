@@ -1,3 +1,4 @@
+import { hourBlockLabel } from "@/lib/booking/calendar";
 import type { Booking } from "@/lib/booking/types";
 import { site } from "@/content/site";
 
@@ -22,7 +23,7 @@ export async function sendBookingEmails(booking: Booking) {
         ``,
         `Vaše rezervace masáže je potvrzena.`,
         `Datum: ${booking.date}`,
-        `Čas: ${booking.time}`,
+        `Čas: ${hourBlockLabel(booking.time)} (celá hodina)`,
         booking.service ? `Služba: ${booking.service}` : null,
         ``,
         `Provozovna: ${site.address}`,
@@ -33,14 +34,14 @@ export async function sendBookingEmails(booking: Booking) {
     },
     toOwner: {
       to: site.email,
-      subject: `Nová rezervace – ${booking.date} ${booking.time}`,
+      subject: `Nová rezervace – ${booking.date} ${hourBlockLabel(booking.time)}`,
       text: [
         `Nová rezervace:`,
         `Jméno: ${booking.name}`,
         `E-mail: ${booking.email}`,
         `Telefon: ${booking.phone}`,
         `Datum: ${booking.date}`,
-        `Čas: ${booking.time}`,
+        `Čas: ${hourBlockLabel(booking.time)} (celá hodina)`,
         booking.service ? `Služba: ${booking.service}` : null,
         booking.note ? `Poznámka: ${booking.note}` : null,
       ]

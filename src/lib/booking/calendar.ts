@@ -70,3 +70,12 @@ export const DEFAULT_TIMES = [
   "16:00",
   "17:00",
 ] as const;
+
+/** Label for a one-hour block starting at `time` (e.g. 15:00 → 15:00–16:00). */
+export function hourBlockLabel(time: string) {
+  const [hRaw, mRaw = "00"] = time.split(":");
+  const h = Number(hRaw);
+  if (!Number.isFinite(h)) return time;
+  const end = `${String(h + 1).padStart(2, "0")}:${mRaw.padStart(2, "0")}`;
+  return `${time}–${end}`;
+}

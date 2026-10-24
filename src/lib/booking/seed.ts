@@ -1,33 +1,23 @@
+import { DEFAULT_TIMES, toDateKey } from "@/lib/booking/calendar";
 import type { Booking, BookingStore, TimeSlot } from "@/lib/booking/types";
-import { toDateKey } from "@/lib/booking/calendar";
 
-const TIMES = ["08:00", "09:30", "11:00", "13:00", "14:30", "16:00"] as const;
+export { hourBlockLabel } from "@/lib/booking/calendar";
 
-const DEMO_CLIENTS = [
-  {
-    name: "Jana Svobodová",
-    email: "jana.svobodova@example.cz",
-    phone: "+420 777 123 456",
-    service: "Relaxace",
-  },
-  {
-    name: "Petr Novák",
-    email: "petr.novak@example.cz",
-    phone: "+420 603 987 654",
-    service: "Hloubková masáž",
-  },
-  {
-    name: "Marie Dvořáková",
-    email: "marie.dvorakova@example.cz",
-    phone: "+420 731 555 210",
-    service: "Obnova těla",
-  },
-  {
-    name: "Tomáš Horák",
-    email: "tomas.horak@example.cz",
-    phone: "+420 608 444 321",
-    service: "Sport",
-  },
+/** Bump when empty-store / migration seed data must re-apply. */
+export const BOOKING_SEED_VERSION = 3;
+
+/** Real upcoming reservations transferred from the previous booking system. */
+export const REAL_BOOKINGS = [
+  { name: "Lukáš Lačík", date: "2026-10-26", time: "15:00" },
+  { name: "Božena Bojkova", date: "2026-10-29", time: "15:00" },
+  { name: "Pavlína Sušková", date: "2026-10-30", time: "16:00" },
+  { name: "Zuzana Lysková", date: "2026-11-03", time: "16:00" },
+  { name: "Petr Bonacina", date: "2026-11-05", time: "17:00" },
+  { name: "Karel Wojnar", date: "2026-11-09", time: "16:00" },
+  { name: "Lucie Karchová", date: "2026-11-10", time: "17:00" },
+  { name: "Božena Bojkova", date: "2026-11-12", time: "15:00" },
+  { name: "Božena Bojkova", date: "2026-11-26", time: "15:00" },
+  { name: "Božena Bojkova", date: "2026-12-10", time: "15:00" },
 ] as const;
 
 function makeId(prefix: string) {
@@ -41,7 +31,51 @@ function hash(n: number) {
   return x >>> 0;
 }
 
-/** Deterministic “random” weekday slots for the next ~5 weeks when store is empty. */
+function isFullHour(time: string) {
+  return /^\d{2}:00$/.test(time);
+}
+
+function applyRealBookings(slots: TimeSlot[], bookings: Booking[]): void {
+  for (const real of REAL_BOOKINGS) {
+    let slot = slots.find((s) => s.date === real.date && s.time === real.time);
+    if (!slot) {
+      slot = {
+        id: makeId("slot"),
+        date: real.date,
+        time: real.time,
+        status: "available",
+      };
+      slots.push(slot);
+    }
+    if (slot.status === "booked" && slot.bookingId) {
+      const existing = bookings.find((b) => b.id === slot!.bookingId);
+      if (existing?.name === real.name) continue;
+    }
+
+    const bookingId = makeId("book");
+    const booking: Booking = {
+      id: bookingId,
+      slotId: slot.id,
+      date: real.date,
+      time: real.time,
+      name: real.name,
+      email: "",
+      phone: "",
+      service: undefined,
+      note: "Přeneseno z původní rezervace",
+      createdAt: new Date().toISOString(),
+      cancelToken: makeId("cancel"),
+    };
+    slot.status = "booked";
+    slot.bookingId = bookingId;
+    bookings.push(booking);
+  }
+}
+
+/**
+ * Hourly weekday openings for ~8 weeks.
+ * Each click books the whole hour — duration of the service does not matter.
+ */
 export function seedDemoSlots(store: BookingStore): BookingStore {
   if (store.slots.length > 0) return store;
 
@@ -49,20 +83,18 @@ export function seedDemoSlots(store: BookingStore): BookingStore {
   start.setHours(12, 0, 0, 0);
   const slots: TimeSlot[] = [];
 
-  for (let day = 1; day <= 40; day++) {
+  for (let day = 0; day <= 56; day++) {
     const d = new Date(start);
     d.setDate(start.getDate() + day);
-    const wd = d.getDay(); // 0 Sun … 6 Sat
-    if (wd === 0 || wd === 6) continue; // weekend closed
+    const wd = d.getDay();
+    if (wd === 0 || wd === 6) continue;
     const date = toDateKey(d);
     const pick = hash(day * 17 + d.getMonth());
-    if (pick % 3 === 0) continue; // some days empty
-    const count = 2 + (pick % 3);
-    const used = new Set<string>();
-    for (let i = 0; i < count; i++) {
-      const t = TIMES[(pick + i * 2) % TIMES.length];
-      if (used.has(t)) continue;
-      used.add(t);
+    // Most weekdays open; skip a few quieter days
+    if (pick % 7 === 0) continue;
+    for (const t of DEFAULT_TIMES) {
+      // Lightly thin lunch / early slots so the calendar stays readable
+      if ((t === "12:00" || t === "08:00") && pick % 2 === 0) continue;
       slots.push({
         id: makeId("slot"),
         date,
@@ -75,53 +107,90 @@ export function seedDemoSlots(store: BookingStore): BookingStore {
   return {
     ...store,
     slots,
+    seedVersion: BOOKING_SEED_VERSION,
     updatedAt: new Date().toISOString(),
   };
 }
 
-/** Sample reservations so /sprava shows name, time and phone. */
+/** Seed real reservations (replaces old demo clients). */
 export function seedDemoBookings(store: BookingStore): BookingStore {
   if (store.bookings.length > 0) return store;
 
-  const available = store.slots
-    .filter((s) => s.status === "available")
-    .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
-
-  if (available.length === 0) return store;
-
-  const bookings: Booking[] = [];
   const slots = store.slots.map((s) => ({ ...s }));
-  const pickEvery = Math.max(1, Math.floor(available.length / (DEMO_CLIENTS.length + 1)));
-
-  DEMO_CLIENTS.forEach((client, i) => {
-    const source = available[Math.min(i * pickEvery, available.length - 1)];
-    if (!source) return;
-    const slot = slots.find((s) => s.id === source.id);
-    if (!slot || slot.status !== "available") return;
-
-    const bookingId = makeId("book");
-    const booking: Booking = {
-      id: bookingId,
-      slotId: slot.id,
-      date: slot.date,
-      time: slot.time,
-      name: client.name,
-      email: client.email,
-      phone: client.phone,
-      service: client.service,
-      note: "Testovací rezervace (ukázka)",
-      createdAt: new Date().toISOString(),
-      cancelToken: makeId("cancel"),
-    };
-    slot.status = "booked";
-    slot.bookingId = bookingId;
-    bookings.push(booking);
-  });
+  const bookings: Booking[] = [];
+  applyRealBookings(slots, bookings);
 
   return {
     ...store,
     slots,
     bookings,
+    seedVersion: BOOKING_SEED_VERSION,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * One-shot migration: full-hour slots only + real upcoming bookings.
+ * Safe to run repeatedly when seedVersion is behind.
+ */
+export function migrateToHourlyRealBookings(store: BookingStore): BookingStore {
+  if ((store.seedVersion ?? 0) >= BOOKING_SEED_VERSION) return store;
+
+  // Drop half-hour / irregular times; keep full-hour inventory
+  let slots = store.slots
+    .filter((s) => isFullHour(s.time))
+    .map((s) => ({ ...s }));
+
+  // Drop previous demo / transferred bookings — re-apply from REAL_BOOKINGS
+  const keepBookings = store.bookings.filter(
+    (b) =>
+      isFullHour(b.time) &&
+      b.note !== "Testovací rezervace (ukázka)" &&
+      b.note !== "Přeneseno z původní rezervace" &&
+      !REAL_BOOKINGS.some((r) => r.date === b.date && r.time === b.time && r.name === b.name),
+  );
+
+  // Free slots that belonged to removed bookings
+  const keepIds = new Set(keepBookings.map((b) => b.id));
+  for (const slot of slots) {
+    if (slot.bookingId && !keepIds.has(slot.bookingId)) {
+      slot.status = "available";
+      delete slot.bookingId;
+    }
+  }
+
+  // Ensure weekday hourly openings exist for the next ~8 weeks
+  const start = new Date();
+  start.setHours(12, 0, 0, 0);
+  const existing = new Map(slots.map((s) => [`${s.date}|${s.time}`, s]));
+  for (let day = 0; day <= 56; day++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + day);
+    const wd = d.getDay();
+    if (wd === 0 || wd === 6) continue;
+    const date = toDateKey(d);
+    for (const t of DEFAULT_TIMES) {
+      const key = `${date}|${t}`;
+      if (existing.has(key)) continue;
+      const slot: TimeSlot = {
+        id: makeId("slot"),
+        date,
+        time: t,
+        status: "available",
+      };
+      slots.push(slot);
+      existing.set(key, slot);
+    }
+  }
+
+  const bookings = [...keepBookings];
+  applyRealBookings(slots, bookings);
+
+  return {
+    ...store,
+    slots,
+    bookings,
+    seedVersion: BOOKING_SEED_VERSION,
     updatedAt: new Date().toISOString(),
   };
 }

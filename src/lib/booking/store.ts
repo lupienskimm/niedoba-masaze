@@ -1,7 +1,12 @@
 import { get, put } from "@vercel/blob";
 import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import { seedDemoBookings, seedDemoSlots } from "@/lib/booking/seed";
+import {
+  BOOKING_SEED_VERSION,
+  migrateToHourlyRealBookings,
+  seedDemoBookings,
+  seedDemoSlots,
+} from "@/lib/booking/seed";
 import {
   emptyStore,
   type Booking,
@@ -57,6 +62,10 @@ export async function loadStore(): Promise<BookingStore> {
   }
   if (!store) store = await readLocal();
   let changed = false;
+  if ((store.seedVersion ?? 0) < BOOKING_SEED_VERSION) {
+    store = migrateToHourlyRealBookings(store);
+    changed = true;
+  }
   if (store.slots.length === 0) {
     store = seedDemoSlots(store);
     changed = true;

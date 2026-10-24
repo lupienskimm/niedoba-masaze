@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   buildMonthGrid,
   DAY_LABELS,
+  hourBlockLabel,
   monthTitle,
   shiftMonth,
   toDateKey,
@@ -131,8 +132,9 @@ export function BookingWizard() {
       <div className="booking-done">
         <h2 className="booking-done__title">Rezervace je hotová</h2>
         <p>
-          Termín <strong>{done.date}</strong> v <strong>{done.time}</strong> je
-          zarezervovaný. Potvrzení přijde e-mailem.
+          Termín <strong>{done.date}</strong> ·{" "}
+          <strong>{hourBlockLabel(done.time)}</strong> je zarezervovaný
+          (celá hodina). Potvrzení přijde e-mailem.
         </p>
         <p className="muted">
           Provozovna: {site.address}. Telefon:{" "}
@@ -163,7 +165,7 @@ export function BookingWizard() {
     <div className="booking-wizard">
       <div className="booking-cal">
         <p className="booking-cal__legend">
-          Den se zeleným označením je volný termín.
+          Zelený den = volný hodinový blok. Rezervace vždy zabere celou hodinu.
         </p>
         <div className="booking-cal__head">
           <button
@@ -246,7 +248,9 @@ export function BookingWizard() {
 
         {selectedDate && (
           <>
-            <h3 className="booking-panel__title">Volné časy · {selectedDate}</h3>
+            <h3 className="booking-panel__title">
+              Volné hodinové bloky · {selectedDate}
+            </h3>
             {daySlots.length === 0 ? (
               <p className="muted">Pro tento den už nejsou volné časy.</p>
             ) : (
@@ -261,7 +265,7 @@ export function BookingWizard() {
                       setStep("form");
                     }}
                   >
-                    {slot.time}
+                    {hourBlockLabel(slot.time)}
                   </button>
                 ))}
               </div>
@@ -272,7 +276,8 @@ export function BookingWizard() {
         {step === "form" && selectedSlot && (
           <form className="booking-form" onSubmit={submit}>
             <h3 className="booking-panel__title">
-              Objednávka · {selectedSlot.date} {selectedSlot.time}
+              Objednávka · {selectedSlot.date}{" "}
+              {hourBlockLabel(selectedSlot.time)}
             </h3>
 
             <fieldset className="booking-services">

@@ -28,6 +28,8 @@ export type BookingStore = {
   slots: TimeSlot[];
   bookings: Booking[];
   updatedAt: string;
+  /** Applied seed/migration version (hourly blocks + real bookings). */
+  seedVersion?: number;
 };
 
 export function emptyStore(): BookingStore {
@@ -35,6 +37,7 @@ export function emptyStore(): BookingStore {
     slots: [],
     bookings: [],
     updatedAt: new Date().toISOString(),
+    seedVersion: 0,
   };
 }
 

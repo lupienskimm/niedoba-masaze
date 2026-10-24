@@ -5,6 +5,7 @@ import {
   buildMonthGrid,
   DAY_LABELS,
   DEFAULT_TIMES,
+  hourBlockLabel,
   monthTitle,
   shiftMonth,
   toDateKey,
@@ -145,8 +146,9 @@ export function SpravaClient() {
         <div>
           <h1 className="sprava__title">Správa termínů</h1>
           <p className="muted">
-            Přidejte nebo odeberte volné časy. Když někdo zavolá, zapište rezervaci
-            sami — termín zmizí z online kalendáře.
+            Termíny jsou jen celé hodiny (např. 15:00–16:00). I krátká služba zabere
+            celý blok. Když někdo zavolá, zapište rezervaci sami — online už termín
+            neuvidí. Delší návštěvu označte v adminu jako další obsazenou hodinu.
           </p>
         </div>
       </div>
@@ -244,7 +246,7 @@ export function SpravaClient() {
                     );
                   }}
                 >
-                  {t}
+                  {hourBlockLabel(t)}
                 </button>
               );
             })}
@@ -259,7 +261,7 @@ export function SpravaClient() {
                 runAction({ action: "add", date: selectedDate, times: selectedTimes })
               }
             >
-              Přidat volné časy
+              Přidat volné hodiny
             </button>
             <button
               type="button"
@@ -290,7 +292,7 @@ export function SpravaClient() {
                   <div className="sprava-list__row">
                     <div className="sprava-person">
                       <p className="sprava-person__time">
-                        <strong>{slot.time}</strong>{" "}
+                        <strong>{hourBlockLabel(slot.time)}</strong>{" "}
                         <span className={`sprava-badge sprava-badge--${slot.status}`}>
                           {slot.status === "available" ? "volný" : "obsazený"}
                         </span>
@@ -301,6 +303,7 @@ export function SpravaClient() {
                             <dt>Jméno</dt>
                             <dd>{booking.name}</dd>
                           </div>
+                          {booking.phone ? (
                           <div>
                             <dt>Telefon</dt>
                             <dd>
@@ -309,6 +312,7 @@ export function SpravaClient() {
                               </a>
                             </dd>
                           </div>
+                          ) : null}
                           {booking.service ? (
                             <div>
                               <dt>Služba</dt>
@@ -373,7 +377,8 @@ export function SpravaClient() {
                   {phoneOpen && slot.status === "available" && (
                     <form className="sprava-phone-form" onSubmit={submitPhoneBooking}>
                       <p className="sprava-phone-form__title">
-                        Zápis telefonické rezervace · {selectedDate} {slot.time}
+                        Zápis telefonické rezervace · {selectedDate}{" "}
+                        {hourBlockLabel(slot.time)}
                       </p>
                       <div className="sprava-phone-form__grid">
                         <label className="booking-field">
@@ -546,7 +551,7 @@ export function SpravaClient() {
               <div className="sprava-person">
                 <p className="sprava-person__time">
                   <strong>
-                    {b.date} · {b.time}
+                    {b.date} · {hourBlockLabel(b.time)}
                   </strong>
                 </p>
                 <dl className="sprava-person__meta">
@@ -554,12 +559,14 @@ export function SpravaClient() {
                     <dt>Jméno</dt>
                     <dd>{b.name}</dd>
                   </div>
+                  {b.phone ? (
                   <div>
                     <dt>Telefon</dt>
                     <dd>
                       <a href={`tel:${b.phone.replace(/\s/g, "")}`}>{b.phone}</a>
                     </dd>
                   </div>
+                  ) : null}
                   {b.service ? (
                     <div>
                       <dt>Služba</dt>
