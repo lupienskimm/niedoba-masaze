@@ -351,6 +351,10 @@ export function BookingWizard() {
               />
             </label>
             {error && <p className="booking-error">{error}</p>}
+            <p className="booking-privacy muted">
+              Odesláním souhlasíte se zpracováním údajů podle{" "}
+              <Link href="/ochrana-udaju">zásad ochrany osobních údajů</Link>.
+            </p>
             <button
               type="submit"
               className="btn btn--primary"

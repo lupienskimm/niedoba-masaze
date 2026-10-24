@@ -43,6 +43,11 @@ export function Footer() {
       <div className="site-footer__legal">
         <p className="site-footer__copy">© 2026 {site.name}</p>
         <p className="site-footer__business">{site.businessNote}</p>
+        <p className="site-footer__policies">
+          <Link href="/ochrana-udaju">Ochrana osobních údajů</Link>
+          <span aria-hidden="true"> · </span>
+          <Link href="/cookies">Cookies</Link>
+        </p>
         <a
           href="https://azervera.cz"
           className="site-footer__credit"
