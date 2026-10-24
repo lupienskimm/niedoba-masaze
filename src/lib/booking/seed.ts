@@ -3,8 +3,8 @@ import type { Booking, BookingStore, TimeSlot } from "@/lib/booking/types";
 
 export { hourBlockLabel } from "@/lib/booking/calendar";
 
-/** Bump when empty-store / migration seed data must re-apply. */
-export const BOOKING_SEED_VERSION = 3;
+/** Bump only for additive migrations — never wipe existing bookings. */
+export const BOOKING_SEED_VERSION = 4;
 
 /** Real upcoming reservations transferred from the previous booking system. */
 export const REAL_BOOKINGS = [
@@ -53,6 +53,7 @@ function applyRealBookings(slots: TimeSlot[], bookings: Booking[]): void {
     }
 
     const bookingId = makeId("book");
+    const now = new Date().toISOString();
     const booking: Booking = {
       id: bookingId,
       slotId: slot.id,
@@ -63,8 +64,11 @@ function applyRealBookings(slots: TimeSlot[], bookings: Booking[]): void {
       phone: "",
       service: undefined,
       note: "Přeneseno z původní rezervace",
-      createdAt: new Date().toISOString(),
+      createdAt: now,
       cancelToken: makeId("cancel"),
+      stav: "potvrzena",
+      zdroj: "import",
+      upraveno: now,
     };
     slot.status = "booked";
     slot.bookingId = bookingId;
@@ -133,10 +137,10 @@ export function seedDemoBookings(store: BookingStore): BookingStore {
 
 /**
  * One-shot migration: full-hour slots only + real upcoming bookings.
- * Safe to run repeatedly when seedVersion is behind.
+ * Locked at version 3 — must NEVER re-run over live data.
  */
 export function migrateToHourlyRealBookings(store: BookingStore): BookingStore {
-  if ((store.seedVersion ?? 0) >= BOOKING_SEED_VERSION) return store;
+  if ((store.seedVersion ?? 0) >= 3) return store;
 
   // Drop half-hour / irregular times; keep full-hour inventory
   let slots = store.slots
@@ -193,6 +197,35 @@ export function migrateToHourlyRealBookings(store: BookingStore): BookingStore {
     slots,
     bookings,
     clients: store.clients ?? [],
+    emailLog: store.emailLog ?? [],
+    seedVersion: 3,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Additive only: fill stav/zdroj/emailLog. Never deletes bookings.
+ */
+export function enrichBookingMeta(store: BookingStore): BookingStore {
+  if ((store.seedVersion ?? 0) >= BOOKING_SEED_VERSION) return store;
+  if (!Array.isArray(store.emailLog)) store.emailLog = [];
+  if (!Array.isArray(store.clients)) store.clients = [];
+
+  for (const b of store.bookings) {
+    if (!b.stav) b.stav = "potvrzena";
+    if (!b.zdroj) {
+      if (b.note === "Přeneseno z původní rezervace") b.zdroj = "import";
+      else if ((b.note || "").toLowerCase().includes("telefon")) b.zdroj = "telefon";
+      else b.zdroj = "web";
+    }
+    if (!b.upraveno) b.upraveno = b.createdAt;
+    if (b.lastNotifiedAt && !b.potvrzeniOdeslano) {
+      b.potvrzeniOdeslano = b.lastNotifiedAt;
+    }
+  }
+
+  return {
+    ...store,
     seedVersion: BOOKING_SEED_VERSION,
     updatedAt: new Date().toISOString(),
   };

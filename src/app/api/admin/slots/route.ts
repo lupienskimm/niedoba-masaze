@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { sendBookingNotify, type NotifyKind } from "@/lib/booking/email";
+import {
+  sendBookingNotify,
+  sendOwnerPhoneSummary,
+  type NotifyKind,
+} from "@/lib/booking/email";
+import { requireAdmin } from "@/lib/booking/require-admin";
 import {
   cancelBookingById,
   extendBooking,
@@ -16,6 +21,7 @@ import {
   upsertAvailableSlots,
   upsertClient,
 } from "@/lib/booking/store";
+
 type Action =
   | "add"
   | "remove"
@@ -30,11 +36,16 @@ type Action =
   | "notify";
 
 export async function GET() {
+  const denied = await requireAdmin();
+  if (denied) return denied;
   const store = await loadStore();
   return NextResponse.json(store);
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+
   const body = (await request.json()) as {
     action?: Action;
     date?: string;
@@ -134,10 +145,19 @@ export async function POST(request: Request) {
       if (error) {
         return NextResponse.json({ error }, { status: 409 });
       }
-      return NextResponse.json(store);
+      const created = store.bookings.find(
+        (b) => b.date === body.date && b.time === body.time && b.stav !== "zrusena",
+      );
+      if (created) {
+        // Telefonická rezervace: jen souhrn pro provozovatele, ne potvrzení klientovi
+        await sendOwnerPhoneSummary(created);
+      }
+      return NextResponse.json(await loadStore());
     }
 
     if (body.action === "move" && body.bookingId && body.date && body.time) {
+      const before = await loadStore();
+      const prev = before.bookings.find((b) => b.id === body.bookingId);
       let error: string | null = null;
       const store = await updateStore((s) => {
         const result = moveBooking(s, body.bookingId!, body.date!, body.time!);
@@ -149,14 +169,19 @@ export async function POST(request: Request) {
       });
       if (error) return NextResponse.json({ error }, { status: 409 });
       const moved = store.bookings.find((b) => b.id === body.bookingId);
-      if (moved) {
-        await sendBookingNotify(moved, "change");
-        await updateStore((s) => markBookingNotified(s, body.bookingId!));
+      if (moved && prev) {
+        await sendBookingNotify(moved, "change", {
+          oldDate: prev.date,
+          oldTime: prev.time,
+          oldDurationHours: prev.durationHours,
+        });
       }
       return NextResponse.json(await loadStore());
     }
 
     if (body.action === "extend" && body.bookingId) {
+      const before = await loadStore();
+      const prev = before.bookings.find((b) => b.id === body.bookingId);
       let error: string | null = null;
       const store = await updateStore((s) => {
         const result = extendBooking(s, body.bookingId!, body.extraHours ?? 1);
@@ -168,9 +193,10 @@ export async function POST(request: Request) {
       });
       if (error) return NextResponse.json({ error }, { status: 409 });
       const extended = store.bookings.find((b) => b.id === body.bookingId);
-      if (extended) {
-        await sendBookingNotify(extended, "extend");
-        await updateStore((s) => markBookingNotified(s, body.bookingId!));
+      if (extended && prev) {
+        await sendBookingNotify(extended, "extend", {
+          oldDurationHours: prev.durationHours ?? 1,
+        });
       }
       return NextResponse.json(await loadStore());
     }
@@ -237,19 +263,39 @@ export async function POST(request: Request) {
       }
       const kind = body.notifyKind || "confirm";
       const result = await sendBookingNotify(booking, kind);
+      // Potvrzení klientovi zapisujeme i když část selže — rezervace zůstává
+      if (kind === "confirm" && (result.client?.ok || result.sent)) {
+        await updateStore((s) => markBookingNotified(s, body.bookingId!));
+      }
+      const next = await loadStore();
       if (!result.sent) {
         const msg =
-          result.reason === "missing_api_key"
-            ? "Chybí RESEND_API_KEY — e-mail se neodeslal."
-            : result.reason === "missing_client_email"
-              ? "Chybí e-mail klienta."
-              : "Odeslání e-mailu selhalo.";
-        return NextResponse.json({ error: msg, store }, { status: 502 });
+          result.reason === "missing_client_email"
+            ? "Chybí e-mail klienta."
+            : result.client?.chyba ||
+              result.owner?.chyba ||
+              "Odeslání e-mailu selhalo (rezervace zůstala uložená).";
+        return NextResponse.json(
+          {
+            error: msg,
+            ...next,
+            _meta: {
+              sent: false,
+              zkusebni: result.zkusebni,
+              prijemceOdeslano: result.prijemceOdeslano,
+            },
+          },
+          { status: 502 },
+        );
       }
-      const next = await updateStore((s) => markBookingNotified(s, body.bookingId!));
       return NextResponse.json({
         ...next,
-        _meta: { sent: true, kind },
+        _meta: {
+          sent: true,
+          kind,
+          zkusebni: result.zkusebni,
+          prijemceOdeslano: result.prijemceOdeslano,
+        },
       });
     }
 

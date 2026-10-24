@@ -170,7 +170,7 @@ export function BookingActions({
                 onClick={() => {
                   if (
                     !window.confirm(
-                      `Zrušit rezervaci ${booking.name} (${booking.date} ${range})? Klient dostane e-mail, pokud má vyplněný.`,
+                      `Opravdu zrušit rezervaci ${booking.name} (${booking.date} ${range})? Termín se uvolní. Když už klient dostal potvrzení, odešle se mu e-mail o zrušení. Tohle nejde vrátit jedním klikem.`,
                     )
                   ) {
                     return;

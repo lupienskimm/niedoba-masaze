@@ -1,179 +1,218 @@
-import { Resend } from "resend";
 import { hourBlockLabel } from "@/lib/booking/calendar";
+import {
+  casOdDo,
+  sablonaDenniPrehled,
+  sablonaPotvrzeniKlient,
+  sablonaPotvrzeniProvozovatel,
+  sablonaPripominka,
+  sablonaProdlouzeni,
+  sablonaZmena,
+  sablonaZruseni,
+} from "@/lib/booking/email-templates";
 import type { Booking } from "@/lib/booking/types";
-import { site } from "@/content/site";
+import { hasConfirmationSent } from "@/lib/booking/types";
+import { posliMail, type PosliMailResult } from "@/lib/mail";
+
+function ownerInbox() {
+  return (
+    process.env.RESEND_KOPIE_PROVOZOVATEL ||
+    process.env.RESEND_REPLY_TO ||
+    "matylupienski@seznam.cz"
+  );
+}
 
 export type NotifyKind =
   | "confirm"
   | "change"
   | "extend"
   | "cancel"
-  | "update";
+  | "update"
+  | "reminder";
 
-function resendClient() {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return null;
-  return new Resend(key);
+export type NotifyResult = {
+  sent: boolean;
+  reason?: string;
+  zkusebni?: boolean;
+  prijemceOdeslano?: string;
+  client?: PosliMailResult;
+  owner?: PosliMailResult;
+};
+
+/** Importované rezervace bez e-mailu nikdy nic nedostanou. */
+export function canEmailClient(booking: Booking) {
+  if (booking.zdroj === "import" && !booking.email?.trim()) return false;
+  return Boolean(booking.email?.trim());
 }
 
-function fromAddress() {
-  return (
-    process.env.RESEND_FROM ||
-    `Masáže Niedoba <${site.email}>`
-  );
-}
-
-function blockRange(booking: Booking) {
-  const hours = Math.max(1, booking.durationHours ?? 1);
-  if (hours === 1) return `${hourBlockLabel(booking.time)} (celá hodina)`;
-  const [hRaw, mRaw = "00"] = booking.time.split(":");
-  const h = Number(hRaw);
-  const end = `${String(h + hours).padStart(2, "0")}:${mRaw.padStart(2, "0")}`;
-  return `${booking.time}–${end} (${hours} hod.)`;
-}
-
-function subjectFor(kind: NotifyKind, booking: Booking) {
-  const when = `${booking.date} ${blockRange(booking)}`;
-  switch (kind) {
-    case "confirm":
-      return `Potvrzení rezervace – ${site.name}`;
-    case "change":
-      return `Změna termínu – ${site.name}`;
-    case "extend":
-      return `Prodloužení rezervace – ${site.name}`;
-    case "cancel":
-      return `Zrušení rezervace – ${site.name}`;
-    default:
-      return `Aktualizace rezervace – ${when}`;
-  }
-}
-
-function clientBody(kind: NotifyKind, booking: Booking) {
-  const lines: Array<string | null> = [
-    `Dobrý den, ${booking.name},`,
-    ``,
-  ];
-
-  switch (kind) {
-    case "confirm":
-      lines.push(`Vaše rezervace masáže je potvrzena.`);
-      break;
-    case "change":
-      lines.push(`Váš termín masáže byl změněn. Aktuální údaje:`);
-      break;
-    case "extend":
-      lines.push(`Vaše rezervace byla prodloužena. Aktuální údaje:`);
-      break;
-    case "cancel":
-      lines.push(`Vaše rezervace masáže byla zrušena.`);
-      break;
-    default:
-      lines.push(`Vaše rezervace byla aktualizována:`);
-  }
-
-  if (kind !== "cancel") {
-    lines.push(
-      `Datum: ${booking.date}`,
-      `Čas: ${blockRange(booking)}`,
-      booking.service ? `Služba: ${booking.service}` : null,
-    );
-  } else {
-    lines.push(
-      `Původní termín: ${booking.date} · ${blockRange(booking)}`,
-      booking.service ? `Služba: ${booking.service}` : null,
-    );
-  }
-
-  lines.push(
-    ``,
-    `Provozovna: ${site.address}`,
-    `Telefon: ${site.phoneDisplay}`,
-    `E-mail: ${site.email}`,
-    ``,
-    `O všech změnách termínu vás budeme informovat e-mailem.`,
-  );
-
-  return lines.filter(Boolean).join("\n");
-}
-
-function ownerBody(kind: NotifyKind, booking: Booking) {
-  const label =
-    kind === "confirm"
-      ? "Nová / odeslaná rezervace"
-      : kind === "change"
-        ? "Změna termínu"
-        : kind === "extend"
-          ? "Prodloužení"
-          : kind === "cancel"
-            ? "Zrušení rezervace"
-            : "Aktualizace rezervace";
-
-  return [
-    `${label}:`,
-    `Jméno: ${booking.name}`,
-    `E-mail: ${booking.email || "—"}`,
-    `Telefon: ${booking.phone || "—"}`,
-    `Datum: ${booking.date}`,
-    `Čas: ${blockRange(booking)}`,
-    booking.service ? `Služba: ${booking.service}` : null,
-    booking.note ? `Poznámka: ${booking.note}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
+/**
+ * Zákazník dostane e-mail o změnách jen když už dřív odešlo potvrzení
+ * (web objednávka, nebo admin stiskl Odeslat info), případně u samotného potvrzení.
+ */
+export function shouldNotifyClient(booking: Booking, kind: NotifyKind) {
+  if (!canEmailClient(booking)) return false;
+  if (kind === "confirm") return true;
+  return hasConfirmationSent(booking);
 }
 
 export async function sendBookingNotify(
   booking: Booking,
   kind: NotifyKind = "confirm",
-) {
-  const resend = resendClient();
-  if (!resend) {
-    console.info("[booking-email] RESEND_API_KEY missing — skip", {
-      bookingId: booking.id,
-      kind,
-    });
-    return { sent: false as const, reason: "missing_api_key" as const };
-  }
-
-  const toClient = booking.email?.trim();
-  if (!toClient) {
-    return { sent: false as const, reason: "missing_client_email" as const };
-  }
+  extra?: {
+    oldDate?: string;
+    oldTime?: string;
+    oldDurationHours?: number;
+  },
+): Promise<NotifyResult> {
+  const results: NotifyResult = { sent: false };
 
   try {
-    const subject = subjectFor(kind, booking);
-    await resend.emails.send({
-      from: fromAddress(),
-      to: toClient,
-      subject,
-      text: clientBody(kind, booking),
-    });
-
-    // Owner copy (best-effort)
-    try {
-      await resend.emails.send({
-        from: fromAddress(),
-        to: site.email,
-        subject: `${subjectFor(kind, booking)} (kopie)`,
-        text: ownerBody(kind, booking),
+    if (kind === "confirm" && shouldNotifyClient(booking, kind)) {
+      const tpl = sablonaPotvrzeniKlient(booking);
+      results.client = await posliMail({
+        komu: booking.email,
+        predmet: tpl.predmet,
+        html: tpl.html,
+        text: tpl.text,
+        typ: "potvrzeni",
+        rezervaceId: booking.id,
       });
-    } catch (err) {
-      console.error("[booking-email] owner copy failed", err);
+    } else if (kind === "change" && shouldNotifyClient(booking, kind)) {
+      const tpl = sablonaZmena(booking, {
+        date: extra?.oldDate || booking.date,
+        time: extra?.oldTime || booking.time,
+        durationHours: extra?.oldDurationHours,
+      });
+      results.client = await posliMail({
+        komu: booking.email,
+        predmet: tpl.predmet,
+        html: tpl.html,
+        text: tpl.text,
+        typ: "zmena",
+        rezervaceId: booking.id,
+      });
+    } else if (kind === "extend" && shouldNotifyClient(booking, kind)) {
+      const oldHours = extra?.oldDurationHours ?? 1;
+      const staryKonec =
+        hourBlockLabel(booking.time, oldHours).split("–")[1] || booking.time;
+      const tpl = sablonaProdlouzeni(booking, staryKonec);
+      results.client = await posliMail({
+        komu: booking.email,
+        predmet: tpl.predmet,
+        html: tpl.html,
+        text: tpl.text,
+        typ: "prodlouzeni",
+        rezervaceId: booking.id,
+      });
+    } else if (kind === "cancel" && shouldNotifyClient(booking, kind)) {
+      const tpl = sablonaZruseni(booking);
+      results.client = await posliMail({
+        komu: booking.email,
+        predmet: tpl.predmet,
+        html: tpl.html,
+        text: tpl.text,
+        typ: "zruseni",
+        rezervaceId: booking.id,
+      });
+    } else if (kind === "reminder" && shouldNotifyClient(booking, kind)) {
+      const tpl = sablonaPripominka(booking);
+      results.client = await posliMail({
+        komu: booking.email,
+        predmet: tpl.predmet,
+        html: tpl.html,
+        text: tpl.text,
+        typ: "pripominka",
+        rezervaceId: booking.id,
+      });
     }
 
-    return { sent: true as const };
+    // Provozovatel — vždy souhrn (kromě čistě interních věcí)
+    if (kind === "confirm" || kind === "change" || kind === "extend" || kind === "cancel") {
+      const ownerTpl =
+        kind === "confirm"
+          ? sablonaPotvrzeniProvozovatel(booking)
+          : kind === "cancel"
+            ? {
+                predmet: `Zrušení: ${booking.name}, ${booking.date} ${booking.time}`,
+                text: sablonaZruseni(booking).text,
+                html: sablonaZruseni(booking).html,
+              }
+            : kind === "extend"
+              ? {
+                  predmet: `Prodloužení: ${booking.name}, ${casOdDo(booking)}`,
+                  text: `Prodloužení rezervace\n${booking.name}\n${booking.date} ${casOdDo(booking)}`,
+                  html: `<p>Prodloužení: <strong>${booking.name}</strong>, ${casOdDo(booking)}</p>`,
+                }
+              : {
+                  predmet: `Změna: ${booking.name}, ${booking.date} ${booking.time}`,
+                  text: `Změna termínu\n${booking.name}\n${booking.date} ${casOdDo(booking)}`,
+                  html: `<p>Změna termínu: <strong>${booking.name}</strong>, ${booking.date} ${casOdDo(booking)}</p>`,
+                };
+
+      const typ =
+        kind === "confirm"
+          ? "potvrzeni"
+          : kind === "cancel"
+            ? "zruseni"
+            : kind === "extend"
+              ? "prodlouzeni"
+              : "zmena";
+
+      results.owner = await posliMail({
+        komu: ownerInbox(),
+        predmet: ownerTpl.predmet,
+        html: ownerTpl.html,
+        text: ownerTpl.text,
+        typ,
+        rezervaceId: booking.id,
+      });
+    }
+
+    results.sent = Boolean(results.client?.ok || results.owner?.ok);
+    results.zkusebni = results.client?.zkusebni || results.owner?.zkusebni;
+    results.prijemceOdeslano =
+      results.client?.prijemceOdeslano || results.owner?.prijemceOdeslano;
+    if (!results.sent) {
+      results.reason =
+        results.client?.chyba ||
+        results.owner?.chyba ||
+        (!canEmailClient(booking) ? "missing_client_email" : "send_failed");
+    }
   } catch (err) {
-    console.error("[booking-email] send failed", err);
-    return { sent: false as const, reason: "send_failed" as const };
+    console.error("[booking-email] unexpected", err);
+    results.reason = "send_failed";
   }
+
+  return results;
 }
 
-/** @deprecated use sendBookingNotify(..., "confirm") */
 export async function sendBookingEmails(booking: Booking) {
   return sendBookingNotify(booking, "confirm");
 }
 
-/** @deprecated use sendBookingNotify(..., "cancel") */
 export async function sendCancelEmails(booking: Booking) {
-  await sendBookingNotify(booking, "cancel");
+  return sendBookingNotify(booking, "cancel");
+}
+
+export async function sendOwnerPhoneSummary(booking: Booking) {
+  const tpl = sablonaPotvrzeniProvozovatel(booking);
+  return posliMail({
+    komu: ownerInbox(),
+    predmet: `Telefonická rezervace: ${booking.name || "bez jména"}, ${booking.date} ${booking.time}`,
+    html: tpl.html,
+    text: tpl.text,
+    typ: "potvrzeni",
+    rezervaceId: booking.id,
+  });
+}
+
+export async function sendDailyOverview(bookings: Booking[], dayKey: string) {
+  const tpl = sablonaDenniPrehled(bookings, dayKey);
+  return posliMail({
+    komu: ownerInbox(),
+    predmet: tpl.predmet,
+    html: tpl.html,
+    text: tpl.text,
+    typ: "prehled",
+    rezervaceId: `prehled-${dayKey}`,
+  });
 }

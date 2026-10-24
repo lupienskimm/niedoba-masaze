@@ -10,11 +10,14 @@ import {
   shiftMonth,
   toDateKey,
 } from "@/lib/booking/calendar";
+import { AdminLogin } from "@/components/booking/AdminLogin";
 import { BookingActions } from "@/components/booking/BookingActions";
 import type { BookingStore, TimeSlot } from "@/lib/booking/types";
+import { hasConfirmationSent, isBookingActive } from "@/lib/booking/types";
 import { services } from "@/content/services";
 
 export function SpravaClient() {
+  const [authed, setAuthed] = useState<boolean | null>(null);
   const [store, setStore] = useState<BookingStore | null>(null);
   const [year, setYear] = useState(2026);
   const [monthIndex, setMonthIndex] = useState(0);
@@ -47,12 +50,19 @@ export function SpravaClient() {
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/slots");
+      if (res.status === 401) {
+        setAuthed(false);
+        setStore(null);
+        return;
+      }
       if (!res.ok) {
         setLoadError("Nepodařilo se načíst termíny.");
+        setAuthed(true);
         return;
       }
       const data = (await res.json()) as BookingStore;
       setStore(data);
+      setAuthed(true);
       setLoadError(null);
     } catch {
       setLoadError("Síťová chyba při načítání správy.");
@@ -62,6 +72,12 @@ export function SpravaClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function logout() {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setAuthed(false);
+    setStore(null);
+  }
 
   function resetPhoneForm() {
     setPhoneSlotId(null);
@@ -100,17 +116,26 @@ export function SpravaClient() {
         return false;
       }
       const { _meta, ...rest } = data as BookingStore & {
-        _meta?: { sent?: boolean; kind?: string };
+        _meta?: {
+          sent?: boolean;
+          kind?: string;
+          zkusebni?: boolean;
+          prijemceOdeslano?: string;
+        };
       };
       setStore(rest as BookingStore);
       if (body.action === "notify" && _meta?.sent) {
-        setMessage("E-mail s info o rezervaci odeslán.");
+        setMessage(
+          _meta.zkusebni
+            ? `Zkušební režim: e-mail odešel na ${_meta.prijemceOdeslano}.`
+            : `Info o rezervaci odesláno na ${_meta.prijemceOdeslano || "e-mail klienta"}.`,
+        );
       } else if (body.action === "cancelBooking" || body.action === "restore") {
-        setMessage("Rezervace zrušena, termín uvolněn. Klient upozorněn e-mailem (pokud má e-mail).");
+        setMessage("Rezervace zrušena, termín uvolněn.");
       } else if (body.action === "move") {
-        setMessage("Termín přesunut, klient upozorněn e-mailem.");
+        setMessage("Termín přesunut.");
       } else if (body.action === "extend") {
-        setMessage("Rezervace prodloužena, klient upozorněn e-mailem.");
+        setMessage("Rezervace prodloužena.");
       } else if (body.action === "saveClient") {
         setMessage("Klient uložen do seznamu.");
       } else {
@@ -161,15 +186,19 @@ export function SpravaClient() {
     a.time.localeCompare(b.time),
   );
   const booked = (store?.bookings || [])
-    .filter((b) => b.date >= todayKey)
+    .filter((b) => isBookingActive(b) && b.date >= todayKey)
     .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
   const selectedAvailable = selectedTimes.filter((t) =>
     daySlots.some((s) => s.time === t && s.status === "available"),
   );
 
-  if (!calReady) {
+  if (!calReady || authed === null) {
     return <p className="muted">Načítám správu…</p>;
+  }
+
+  if (authed === false) {
+    return <AdminLogin onOk={() => void load()} />;
   }
 
   if (loadError && !store) {
@@ -187,6 +216,9 @@ export function SpravaClient() {
             neuvidí. Delší návštěvu označte v adminu jako další obsazenou hodinu.
           </p>
         </div>
+        <button type="button" className="btn btn--ghost" onClick={() => void logout()}>
+          Odhlásit
+        </button>
       </div>
 
       <div className="sprava-legend">
@@ -693,14 +725,29 @@ export function SpravaClient() {
                         <dd>{b.note}</dd>
                       </div>
                     ) : null}
-                    {b.lastNotifiedAt ? (
-                      <div>
-                        <dt>Poslední e-mail</dt>
-                        <dd>
-                          {new Date(b.lastNotifiedAt).toLocaleString("cs-CZ")}
-                        </dd>
-                      </div>
-                    ) : null}
+                    <div>
+                      <dt>Potvrzení</dt>
+                      <dd>
+                        {hasConfirmationSent(b)
+                          ? `odesláno ${new Date(
+                              (b.potvrzeniOdeslano || b.lastNotifiedAt)!,
+                            ).toLocaleString("cs-CZ")}`
+                          : "ještě neodešlo"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Připomínka</dt>
+                      <dd>
+                        {store?.emailLog?.some(
+                          (e) =>
+                            e.rezervaceId === b.id &&
+                            e.typ === "pripominka" &&
+                            e.stav === "ok",
+                        )
+                          ? "odeslána"
+                          : "zatím ne"}
+                      </dd>
+                    </div>
                   </dl>
                 </div>
                 <BookingActions

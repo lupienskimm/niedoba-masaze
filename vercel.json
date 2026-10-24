@@ -1,0 +1,6 @@
+{
+  "crons": [
+    { "path": "/api/cron/pripominky", "schedule": "*/15 * * * *" },
+    { "path": "/api/cron/denni-prehled", "schedule": "0 * * * *" }
+  ]
+}

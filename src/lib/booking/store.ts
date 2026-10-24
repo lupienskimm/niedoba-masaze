@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import path from "path";
 import {
   BOOKING_SEED_VERSION,
+  enrichBookingMeta,
   migrateToHourlyRealBookings,
   seedDemoBookings,
   seedDemoSlots,
@@ -12,6 +13,7 @@ import {
   type Booking,
   type BookingStore,
   type Client,
+  type EmailLogEntry,
   type TimeSlot,
 } from "@/lib/booking/types";
 
@@ -56,21 +58,30 @@ async function writeBlob(store: BookingStore) {
   });
 }
 
-export async function loadStore(): Promise<BookingStore> {
-  let store: BookingStore | null = null;
+async function readRaw(): Promise<BookingStore> {
   if (canUseBlob()) {
-    store = await readBlob();
+    const blob = await readBlob();
+    if (blob) return blob;
   }
-  if (!store) store = await readLocal();
+  return readLocal();
+}
+
+function normalizeStore(store: BookingStore): { store: BookingStore; changed: boolean } {
   let changed = false;
   if (!Array.isArray(store.clients)) {
     store.clients = [];
     changed = true;
   }
-  if ((store.seedVersion ?? 0) < BOOKING_SEED_VERSION) {
+  if (!Array.isArray(store.emailLog)) {
+    store.emailLog = [];
+    changed = true;
+  }
+  // Hourly + real bookings migration ONLY when behind v3 (never wipe existing v3+)
+  if ((store.seedVersion ?? 0) < 3) {
     store = migrateToHourlyRealBookings(store);
     changed = true;
   }
+  // Slots/bookings seed ONLY when empty
   if (store.slots.length === 0) {
     store = seedDemoSlots(store);
     changed = true;
@@ -79,35 +90,80 @@ export async function loadStore(): Promise<BookingStore> {
     store = seedDemoBookings(store);
     changed = true;
   }
-  if (!Array.isArray(store.clients)) {
-    store.clients = [];
+  if ((store.seedVersion ?? 0) < BOOKING_SEED_VERSION) {
+    store = enrichBookingMeta(store);
     changed = true;
   }
-  if (changed) await saveStore(store);
-  return store;
+  return { store, changed };
 }
 
-export async function saveStore(store: BookingStore): Promise<void> {
+export async function loadStore(): Promise<BookingStore> {
+  let store = await readRaw();
+  const { store: next, changed } = normalizeStore(store);
+  if (changed) await saveStoreForce(next);
+  return next;
+}
+
+async function saveStoreForce(store: BookingStore): Promise<BookingStore> {
   const next = { ...store, updatedAt: new Date().toISOString() };
   if (canUseBlob()) {
     try {
       await writeBlob(next);
-      return;
+      return next;
     } catch (err) {
       console.error("Blob save failed, falling back to local file", err);
     }
   }
   await writeLocal(next);
+  return next;
 }
 
+export async function saveStore(store: BookingStore): Promise<void> {
+  await saveStoreForce(store);
+}
+
+/**
+ * Optimistic concurrency: mutate only if updatedAt is unchanged since load.
+ * Retries up to 3 times on conflict.
+ */
 export async function updateStore(
   mutator: (store: BookingStore) => BookingStore | void,
 ): Promise<BookingStore> {
-  const store = await loadStore();
-  const result = mutator(store);
-  const next = result ?? store;
-  await saveStore(next);
-  return next;
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const loaded = await loadStore();
+    const expected = loaded.updatedAt;
+    const draft = structuredClone(loaded);
+    const result = mutator(draft);
+    const next = result ?? draft;
+    const fresh = await readRaw();
+    if (fresh.updatedAt !== expected) {
+      lastError = new Error("Konflikt zápisu");
+      continue;
+    }
+    return saveStoreForce(next);
+  }
+  throw lastError || new Error("Uložení selhalo po opakováních.");
+}
+
+export async function appendEmailLog(entry: EmailLogEntry) {
+  return updateStore((store) => {
+    if (!Array.isArray(store.emailLog)) store.emailLog = [];
+    if (entry.typ === "pripominka" && entry.stav === "ok") {
+      const exists = store.emailLog.some(
+        (e) =>
+          e.rezervaceId === entry.rezervaceId &&
+          e.typ === "pripominka" &&
+          e.stav === "ok",
+      );
+      if (exists) return store;
+    }
+    store.emailLog.unshift(entry);
+    if (store.emailLog.length > 500) {
+      store.emailLog = store.emailLog.slice(0, 500);
+    }
+    return store;
+  });
 }
 
 export function publicSlots(store: BookingStore, from?: string, to?: string) {
@@ -318,6 +374,7 @@ export function moveBooking(
   const primary = store.slots.find((s) => s.date === date && s.time === time);
   booking.date = date;
   booking.time = time;
+  booking.upraveno = new Date().toISOString();
   if (primary) booking.slotId = primary.id;
   return { store, booking };
 }
@@ -348,9 +405,11 @@ export function extendBooking(
   }
 
   booking.durationHours = next;
+  booking.upraveno = new Date().toISOString();
   return { store, booking };
 }
 
+/** Soft cancel: keep the row, free the calendar slots. */
 export function cancelBookingById(
   store: BookingStore,
   bookingId: string,
@@ -358,13 +417,19 @@ export function cancelBookingById(
   const booking = store.bookings.find((b) => b.id === bookingId);
   if (!booking) return { error: "Rezervace nenalezena." };
   releaseBookingSlots(store, bookingId);
-  store.bookings = store.bookings.filter((b) => b.id !== bookingId);
+  booking.stav = "zrusena";
+  booking.upraveno = new Date().toISOString();
   return { store, booking };
 }
 
 export function markBookingNotified(store: BookingStore, bookingId: string) {
   const booking = store.bookings.find((b) => b.id === bookingId);
-  if (booking) booking.lastNotifiedAt = new Date().toISOString();
+  if (booking) {
+    const now = new Date().toISOString();
+    booking.lastNotifiedAt = now;
+    booking.potvrzeniOdeslano = now;
+    booking.upraveno = now;
+  }
   return store;
 }
 
@@ -377,12 +442,14 @@ export function createBooking(
     phone?: string;
     note?: string;
     service?: string;
+    zdroj?: Booking["zdroj"];
   },
 ): { store: BookingStore; booking: Booking } | { error: string } {
   const slot = store.slots.find((s) => s.id === input.slotId);
   if (!slot) return { error: "Termín neexistuje." };
   if (slot.status !== "available") return { error: "Termín už není volný." };
 
+  const now = new Date().toISOString();
   const booking: Booking = {
     id: makeId("book"),
     slotId: slot.id,
@@ -393,13 +460,18 @@ export function createBooking(
     phone: (input.phone || "").trim(),
     note: input.note?.trim() || undefined,
     service: input.service?.trim() || undefined,
-    createdAt: new Date().toISOString(),
+    createdAt: now,
     cancelToken: makeId("cancel"),
+    stav: "potvrzena",
+    zdroj:
+      input.zdroj ||
+      (input.note?.toLowerCase().includes("telefon") ? "telefon" : "web"),
+    upraveno: now,
+    durationHours: 1,
   };
 
   slot.status = "booked";
   slot.bookingId = booking.id;
-  booking.durationHours = 1;
   store.bookings.unshift(booking);
   rememberClientFromBooking(store, booking);
   return { store, booking };
@@ -448,6 +520,7 @@ export function manualPhoneBooking(
     email,
     note: input.note || "Rezervace telefonicky",
     service: input.service,
+    zdroj: "telefon",
   });
 }
 

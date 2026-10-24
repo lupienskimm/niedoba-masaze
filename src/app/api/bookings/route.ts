@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import { sendBookingEmails } from "@/lib/booking/email";
-import { createBooking, updateStore } from "@/lib/booking/store";
+import { sendBookingNotify } from "@/lib/booking/email";
+import {
+  createBooking,
+  markBookingNotified,
+  updateStore,
+} from "@/lib/booking/store";
 import type { Booking } from "@/lib/booking/types";
 
 export async function POST(request: Request) {
@@ -14,7 +18,12 @@ export async function POST(request: Request) {
       service?: string;
     };
 
-    if (!body.slotId || !body.name?.trim() || !body.email?.trim() || !body.phone?.trim()) {
+    if (
+      !body.slotId ||
+      !body.name?.trim() ||
+      !body.email?.trim() ||
+      !body.phone?.trim()
+    ) {
       return NextResponse.json(
         { error: "Vyplňte jméno, e-mail, telefon a termín." },
         { status: 400 },
@@ -32,6 +41,7 @@ export async function POST(request: Request) {
         phone: body.phone!,
         note: body.note,
         service: body.service,
+        zdroj: "web",
       });
       if ("error" in result) {
         error = result.error;
@@ -49,7 +59,15 @@ export async function POST(request: Request) {
     }
 
     const confirmed = booking as Booking;
-    await sendBookingEmails(confirmed);
+    // E-mail nesmí shodit uloženou rezervaci
+    try {
+      const mail = await sendBookingNotify(confirmed, "confirm");
+      if (mail.client?.ok || mail.sent) {
+        await updateStore((s) => markBookingNotified(s, confirmed.id));
+      }
+    } catch (err) {
+      console.error("[bookings] mail failed after save", err);
+    }
 
     return NextResponse.json({
       ok: true,
@@ -64,6 +82,9 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Nepodařilo se uložit rezervaci." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Nepodařilo se uložit rezervaci." },
+      { status: 500 },
+    );
   }
 }

@@ -3123,6 +3123,17 @@ body:has(.site-nav-overlay.is-open) .mobile-quickbar {
   gap: calc(var(--u) * 1.25);
 }
 
+.admin-login {
+  max-width: 22rem;
+  margin: calc(var(--u) * 4) auto;
+  display: grid;
+  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(30, 58, 43, 0.1);
+}
+
 @media (max-width: 720px) {
   .sprava-phone-form__grid,
   .sprava-list__row {
